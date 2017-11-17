@@ -1,0 +1,31 @@
+resource "datadog_timeboard" "{{ .Id }}" {
+  title       = "{{ .Title }}"
+  description = "{{ .Description }}"
+  read_only   = {{ .ReadOnly }}
+  {{with .Graphs -}}
+  {{range . }}
+  graph {
+    title = "{{ .Title }}"
+    {{with .Definition -}}
+    viz   = "{{ .Viz }}"
+    {{with .Requests -}}
+    {{range .}}
+    request {
+      q    = "{{ .Query }}"
+      {{ if .Type }}type = "{{ .Type }}"{{end}}
+    }
+    {{end}}
+    {{- end}}
+    {{- end}}
+  }
+  {{end}}
+  {{- end}}
+  {{with .TemplateVariables -}}
+  {{range . }}
+  template_variable {
+    name   = "{{ .Name }}"
+    prefix = "{{ .Prefix }}"
+  }
+  {{end}}
+  {{- end}}
+}
