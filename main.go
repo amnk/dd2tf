@@ -1,30 +1,27 @@
 package main
 
 import (
-        "html/template"
-        "log"
-        "os"
-        "strconv"
-        "github.com/zorkian/go-datadog-api"
+    "html/template"
+    "log"
+    "os"
+    "strconv"
+    "github.com/zorkian/go-datadog-api"
 )
 
 func main() {
     datadog_api_key, ok := os.LookupEnv("DATADOG_API_KEY")
     if !ok {
-        log.Printf("Datadog API key not found, please make sure that DATADOG_API_KEY env variable is set")
-        os.Exit(1)
+        log.Fatalf("Datadog API key not found, please make sure that DATADOG_API_KEY env variable is set")
     }
 
     datadog_app_key, ok := os.LookupEnv("DATADOG_APP_KEY")
     if !ok {
-        log.Printf("Datadog APP key not found, please make sure that DATADOG_APP_KEY env variable is set")
-        os.Exit(1)
+        log.Fatalf("Datadog APP key not found, please make sure that DATADOG_APP_KEY env variable is set")
     }
 
     datadog_dashboard, ok := os.LookupEnv("DATADOG_DASH_ID")
     if !ok {
-        log.Printf("Datadog dashboard id not found, please make sure that DATADOG_DASH_ID env variable is set")
-        os.Exit(1)
+        log.Fatalf("Datadog dashboard id not found, please make sure that DATADOG_DASH_ID env variable is set")
     }
 
     client := datadog.NewClient(datadog_api_key, datadog_app_key)
