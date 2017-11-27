@@ -7,25 +7,44 @@ resource "datadog_timeboard" "{{ .Id }}" {
   graph {
     title = "{{ .Title }}"
     {{with .Definition -}}
-    viz   = "{{ .Viz }}"
-    {{with .Requests -}}
-    {{range .}}
+    viz   = "{{ .Viz -}}"
+    {{if .Autoscale -}}autoscale = "{{ .Autoscale }}"{{- end}}
+    {{if .Precision -}}precision = "{{ .Precision }}"{{- end}}
+    {{if .Groups -}}group = [{{$groups := .Groups}}{{range $index, $elem := .Groups}}{{if $index}},{{end}}"{{$elem}}"{{end}}]{{- end}}
+    {{if .Scopes -}}scope = [{{$scopes := .Scopes}}{{range $index, $elem := .Scopes}}{{if $index}},{{end}}"{{$elem}}"{{end}}]{{- end}}
+    {{if .Style -}}
+    style {
+      palette      = "{{ .Style.Palette }}"
+      palette_flip = "{{ .Style.PaletteFlip }}"
+    }{{- end}}
+    {{- if .Markers -}}{{- with .Markers -}}{{range .}}
+    marker {
+      type  = "{{ .Type }}"
+      value = "{{ .Value }}"
+      {{ if .Label -}}label = "{{ .Label }}"{{- end}}
+    }{{- end}}{{- end}}{{- end}}
+    {{- with .Requests -}}{{range .}}
     request {
-      q    = "{{ .Query }}"
-      {{ if .Type }}type = "{{ .Type }}"{{end}}
+      q    = "{{ .Query -}}"
+      {{ if .Type -}}type = "{{ .Type }}"{{- end }}
+      {{ if .Aggregator -}}aggregator = "{{ .Aggregator }}"{{- end}}
+      {{ if .Style -}}{{- with .Style -}}
+      style {
+        {{if .Palette -}}palette = "{{ .Palette }}"{{- end}}
+        {{if .Width -}}width = "{{ .Width }}"{{- end}}
+        {{if .Type -}}type = "{{ .Type }}"{{- end}}
+      }
+      {{- end}}{{- end}}
     }
-    {{end}}
     {{- end}}
     {{- end}}
-  }
-  {{end}}
-  {{- end}}
-  {{with .TemplateVariables -}}
-  {{range . }}
+    {{- end}}
+  }{{end}}{{- end}}
+  {{- with .TemplateVariables -}}{{- range . }}
+
   template_variable {
-    name   = "{{ .Name }}"
-    prefix = "{{ .Prefix }}"
-  }
-  {{end}}
-  {{- end}}
+    name    = "{{ .Name }}"
+    prefix  = "{{ .Prefix }}"
+    default = "{{ .Default }}" 
+  }{{end}}{{- end}}
 }
