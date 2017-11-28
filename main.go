@@ -2,7 +2,9 @@ package main
 
 import (
     "text/template"
+    "bufio"
     "flag"
+    "fmt"
     "log"
     "os"
     "strconv"
@@ -12,15 +14,25 @@ import (
 
 func getAllDashboards(client datadog.Client) []int {
     var ids []int
-    dash_ids, _ := client.GetDashboards()
-    for _, elem := range dash_ids {
+    dashboards, err := client.GetDashboards()
+    if err != nil {
+        log.Fatal(err)
+    }
+    for _, elem := range dashboards {
         ids = append(ids, *elem.Id)
     }
     return ids
 }
 
 func main() {
+    var dashboards = flag.String("dashboards", "",
+        "IDs of dashboards, separated by comma. If nothing is given, all dashboards are parsed")
+    var files = flag.Bool("files", false, "Create file for each entity instead of stdout dump")
+
+    flag.Parse()
+
     datadog_api_key, ok := os.LookupEnv("DATADOG_API_KEY")
+
     if !ok {
         log.Fatalf("Datadog API key not found, please make sure that DATADOG_API_KEY env variable is set")
     }
@@ -30,12 +42,9 @@ func main() {
         log.Fatalf("Datadog APP key not found, please make sure that DATADOG_APP_KEY env variable is set")
     }
 
-    var dashboards = flag.String("dashboards", "",
-        "IDs of dashboards, separated by comma. If nothing is given, all dashboards are parsed")
-    flag.Parse()
-
     client := datadog.NewClient(datadog_api_key, datadog_app_key)
 
+    //Keeps a list of dashboard IDs as ints
     var dash_ids []int
     if len(*dashboards) == 0 {
         dash_ids = getAllDashboards(*client)
@@ -49,11 +58,27 @@ func main() {
     for _, element := range dash_ids {
         dash, err := client.GetDashboard(element)
         if err != nil {
-            log.Fatalf("fatal: %s\n", err)
+            log.Fatal(err)
         }
 
-        t := template.New("timeboard.tmpl").Funcs(template.FuncMap{"StringsJoin": strings.Join})
+        //TODO: keep template a part of the binary
+        t := template.New("timeboard.tmpl")
         t, _ = t.ParseFiles("timeboard.tmpl")
-        t.Execute(os.Stdout, *dash)
+
+        if *files {
+            file := fmt.Sprintf("%v.tf", element)
+            f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0755)
+            if err != nil {
+		log.Fatal(err)
+	    }
+            out := bufio.NewWriter(f)
+            t.Execute(out, *dash)
+            out.Flush()
+            if err := f.Close(); err != nil {
+                log.Fatal(err)
+            }
+        } else {
+            t.Execute(os.Stdout, *dash)
+        }
     }
 }
