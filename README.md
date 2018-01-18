@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/amnk/dd2tf.svg?branch=master)](https://travis-ci.org/amnk/dd2tf)
+
 A simple utility to convert DataDog Dashboard to Terraform format. 
 
 Requires `DATADOG_API_KEY` and `DATADOG_APP_KEY` environment variables.
