@@ -1,3 +1,5 @@
+//go:generate go-bindata -o tpl.go tmpl
+
 package main
 
 import (
@@ -62,8 +64,8 @@ func main() {
         }
 
         //TODO: keep template a part of the binary
-        t := template.New("timeboard.tmpl")
-        t, _ = t.ParseFiles("timeboard.tmpl")
+        b, _ := Asset("tmpl/timeboard.tmpl")
+        t, _ := template.New("").Parse(string(b))
 
         if *files {
             file := fmt.Sprintf("%v.tf", element)
