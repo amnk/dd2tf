@@ -63,7 +63,6 @@ func main() {
             log.Fatal(err)
         }
 
-        //TODO: keep template a part of the binary
         b, _ := Asset("tmpl/timeboard.tmpl")
         t, _ := template.New("").Parse(string(b))
 
