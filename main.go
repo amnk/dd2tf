@@ -11,7 +11,7 @@ import (
     "os"
     "strconv"
     "strings"
-    "github.com/zorkian/go-datadog-api"
+    "gopkg.in/zorkian/go-datadog-api.v2"
 )
 
 func getAllDashboards(client datadog.Client) []int {
@@ -26,9 +26,23 @@ func getAllDashboards(client datadog.Client) []int {
     return ids
 }
 
+func getAllMonitors(client datadog.Client) []int {
+    var ids []int
+    monitors, err := client.GetMonitors()
+    if err != nil {
+        log.Fatal(err)
+    }
+    for _, elem := range monitors {
+        ids = append(ids, *elem.Id)
+    }
+    return ids
+}
+
 func main() {
-    var dashboards = flag.String("dashboards", "",
+    var dashboards = flag.String("dashboards", "-1",
         "IDs of dashboards, separated by comma. If nothing is given, all dashboards are parsed")
+    var monitors = flag.String("monitors", "-1",
+        "IDs of monitors, separated by comma. If nothing is given, all monitors are exported")
     var files = flag.Bool("files", false, "Create file for each entity instead of stdout dump")
 
     flag.Parse()
@@ -48,12 +62,26 @@ func main() {
 
     //Keeps a list of dashboard IDs as ints
     var dash_ids []int
-    if len(*dashboards) == 0 {
-        dash_ids = getAllDashboards(*client)
-    } else {
-        for _, element := range strings.Split(*dashboards, ",") {
-            dash, _ := strconv.Atoi(element)
-            dash_ids = append(dash_ids, dash)
+    if ! (*dashboards == "-1") {
+        if len(*dashboards) == 0 {
+            dash_ids = getAllDashboards(*client)
+        } else {
+            for _, element := range strings.Split(*dashboards, ",") {
+                dash, _ := strconv.Atoi(element)
+                dash_ids = append(dash_ids, dash)
+            }
+        }
+    }
+
+    var mon_ids []int
+    if ! (*monitors == "-1") {
+        if len(*monitors) == 0 {
+            mon_ids = getAllMonitors(*client)
+        } else {
+            for _, element := range strings.Split(*monitors, ",") {
+                mon, _ := strconv.Atoi(element)
+                mon_ids = append(mon_ids, mon)
+            }
         }
     }
 
@@ -67,7 +95,7 @@ func main() {
         t, _ := template.New("").Parse(string(b))
 
         if *files {
-            file := fmt.Sprintf("%v.tf", element)
+            file := fmt.Sprintf("dash-%v.tf", element)
             f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0755)
             if err != nil {
 		log.Fatal(err)
@@ -82,4 +110,32 @@ func main() {
             t.Execute(os.Stdout, *dash)
         }
     }
+
+    //TODO: those two loops should probably be refactored into some common loop.
+    for _, element := range mon_ids {
+        dash, err := client.GetMonitor(element)
+        if err != nil {
+            log.Fatal(err)
+        }
+
+        b, _ := Asset("tmpl/monitor.tmpl")
+        t, _ := template.New("").Parse(string(b))
+
+        if *files {
+            file := fmt.Sprintf("mon-%v.tf", element)
+            f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0755)
+            if err != nil {
+		log.Fatal(err)
+	    }
+            out := bufio.NewWriter(f)
+            t.Execute(out, *dash)
+            out.Flush()
+            if err := f.Close(); err != nil {
+                log.Fatal(err)
+            }
+        } else {
+            t.Execute(os.Stdout, *dash)
+        }
+    }
+
 }
