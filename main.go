@@ -5,7 +5,7 @@ package main
 import (
     "text/template"
     "bufio"
-    "flag"
+    flag "github.com/spf13/pflag"
     "fmt"
     "log"
     "os"
@@ -118,14 +118,12 @@ func (i *Item) renderElement(config LocalConfig) {
 }
 
 func main() {
-    var dashboards = flag.String("dashboards", "-1",
-        "IDs of dashboards, separated by comma")
-    var all_dashboards = flag.Bool("all_dashboards", false,
-        "If set, all dashobards will be exported.")
-    var monitors = flag.String("monitors", "-1",
-        "IDs of monitors, separated by comma")
-    var all_monitors = flag.Bool("all_monitors", false,
-        "If set, all monitors will be exported.")
+    var dashboards = flag.String("dashboards", "",
+        "IDs of dashboards, separated by comma. If no IDs are given, all dashboards are exported.")
+    flag.Lookup("dashboards").NoOptDefVal = "-1"
+    var monitors = flag.String("monitors", "",
+        "IDs of monitors, separated by comma. If no IDs are given, all monitors are exported.")
+    flag.Lookup("monitors").NoOptDefVal = "-1"
     var files = flag.Bool("files", false, "Create file for each entity instead of stdout dump")
 
     flag.Parse()
@@ -146,11 +144,9 @@ func main() {
         files: *files,
     }
 
-    if (*all_dashboards) && !(*dashboards == "-1") {
-        log.Fatalf("Either dashboards or all_dashboards can be used.")
-    } else if (*all_dashboards) {
+    if (*dashboards == "-1") {
         config.items = append(config.items, getAllDashboards(config.client)...)
-    } else if ! (*dashboards == "-1") {
+    } else if ! (*dashboards == "") {
         for _, element := range strings.Split(*dashboards, ",") {
             dash, _ := strconv.Atoi(element)
             config.items = append(config.items, Item{id: dash, d: Dashboard{}})
@@ -158,11 +154,9 @@ func main() {
 
     }
 
-    if (*all_monitors) && !(*monitors == "-1") {
-        log.Fatalf("Either monitors or all_monitors can be used.")
-    } else if (*all_monitors) {
+    if (*monitors == "-1") {
         config.items = append(config.items, getAllMonitors(config.client)...)
-    } else if ! (*monitors == "-1") {
+    } else if ! (*monitors == "") {
         for _, element := range strings.Split(*monitors, ",") {
             mon, _ := strconv.Atoi(element)
             config.items = append(config.items, Item{id: mon, d: Monitor{}})
