@@ -14,28 +14,107 @@ import (
     "gopkg.in/zorkian/go-datadog-api.v2"
 )
 
-func getAllDashboards(client datadog.Client) []int {
-    var ids []int
+func getAllDashboards(client datadog.Client) []Item {
+    var ids []Item
     dashboards, err := client.GetDashboards()
     if err != nil {
         log.Fatal(err)
     }
     for _, elem := range dashboards {
-        ids = append(ids, *elem.Id)
+        ids = append(ids, Item{id: *elem.Id, d: Dashboard{}})
     }
     return ids
 }
 
-func getAllMonitors(client datadog.Client) []int {
-    var ids []int
+func getAllMonitors(client datadog.Client) []Item {
+    var ids []Item
     monitors, err := client.GetMonitors()
     if err != nil {
         log.Fatal(err)
     }
     for _, elem := range monitors {
-        ids = append(ids, *elem.Id)
+            ids = append(ids, Item{id: *elem.Id, d: Monitor{}})
     }
     return ids
+}
+
+type LocalConfig struct {
+    client datadog.Client
+    items []Item
+    files bool
+}
+
+type DatadogElement interface {
+    getElement(client datadog.Client, i int) (interface{}, error)
+    getAsset() string
+    getName() string
+}
+
+type Item struct {
+    id int
+    d DatadogElement
+}
+
+type Dashboard struct {
+}
+
+func (d Dashboard) getElement(client datadog.Client, id int) (interface{}, error) {
+    dash, err := client.GetDashboard(id)
+    return dash, err
+}
+
+func (d Dashboard) getAsset() string {
+    return "tmpl/timeboard.tmpl"
+}
+
+func (d Dashboard) getName() string {
+    return "dashboard"
+}
+
+type Monitor struct {
+}
+
+func (m Monitor) getElement(client datadog.Client, id int) (interface{}, error) {
+    mon, err := client.GetMonitor(id)
+    return mon, err
+}
+
+func (m Monitor) getAsset() string {
+    return "tmpl/monitor.tmpl"
+}
+
+func (m Monitor) getName() string {
+    return "monitor"
+}
+
+type RenderableElement interface {
+    renderElement(config LocalConfig)
+}
+
+func (i *Item) renderElement(config LocalConfig) {
+    item, err := i.d.getElement(config.client, i.id)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    b, _ := Asset(i.d.getAsset())
+    t, _ := template.New("").Parse(string(b))
+
+    if config.files {
+        file := fmt.Sprintf("%v-%v.tf", i.d.getName(), item)
+        f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0755)
+        if err != nil {
+            log.Fatal(err)
+        }
+        out := bufio.NewWriter(f)
+        t.Execute(out, item)
+        out.Flush()
+        if err := f.Close(); err != nil {
+            log.Fatal(err)
+        }
+    } else {
+        t.Execute(os.Stdout, item)
+    }
 }
 
 func main() {
@@ -58,84 +137,35 @@ func main() {
         log.Fatalf("Datadog APP key not found, please make sure that DATADOG_APP_KEY env variable is set")
     }
 
-    client := datadog.NewClient(datadog_api_key, datadog_app_key)
+    config := LocalConfig{
+        client: *datadog.NewClient(datadog_api_key, datadog_app_key),
+        files: *files,
+    }
 
     //Keeps a list of dashboard IDs as ints
-    var dash_ids []int
     if ! (*dashboards == "-1") {
         if len(*dashboards) == 0 {
-            dash_ids = getAllDashboards(*client)
+            config.items = append(config.items, getAllDashboards(config.client)...)
         } else {
             for _, element := range strings.Split(*dashboards, ",") {
                 dash, _ := strconv.Atoi(element)
-                dash_ids = append(dash_ids, dash)
+                config.items = append(config.items, Item{id: dash, d: Dashboard{}})
             }
         }
     }
 
-    var mon_ids []int
     if ! (*monitors == "-1") {
         if len(*monitors) == 0 {
-            mon_ids = getAllMonitors(*client)
+            config.items = append(config.items, getAllMonitors(config.client)...)
         } else {
             for _, element := range strings.Split(*monitors, ",") {
                 mon, _ := strconv.Atoi(element)
-                mon_ids = append(mon_ids, mon)
+                config.items = append(config.items, Item{id: mon, d: Monitor{}})
             }
         }
     }
 
-    for _, element := range dash_ids {
-        dash, err := client.GetDashboard(element)
-        if err != nil {
-            log.Fatal(err)
-        }
-
-        b, _ := Asset("tmpl/timeboard.tmpl")
-        t, _ := template.New("").Parse(string(b))
-
-        if *files {
-            file := fmt.Sprintf("dash-%v.tf", element)
-            f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0755)
-            if err != nil {
-		log.Fatal(err)
-	    }
-            out := bufio.NewWriter(f)
-            t.Execute(out, *dash)
-            out.Flush()
-            if err := f.Close(); err != nil {
-                log.Fatal(err)
-            }
-        } else {
-            t.Execute(os.Stdout, *dash)
-        }
+    for _, element := range config.items {
+        element.renderElement(config)
     }
-
-    //TODO: those two loops should probably be refactored into some common loop.
-    for _, element := range mon_ids {
-        dash, err := client.GetMonitor(element)
-        if err != nil {
-            log.Fatal(err)
-        }
-
-        b, _ := Asset("tmpl/monitor.tmpl")
-        t, _ := template.New("").Parse(string(b))
-
-        if *files {
-            file := fmt.Sprintf("mon-%v.tf", element)
-            f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0755)
-            if err != nil {
-		log.Fatal(err)
-	    }
-            out := bufio.NewWriter(f)
-            t.Execute(out, *dash)
-            out.Flush()
-            if err := f.Close(); err != nil {
-                log.Fatal(err)
-            }
-        } else {
-            t.Execute(os.Stdout, *dash)
-        }
-    }
-
 }
