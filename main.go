@@ -101,7 +101,7 @@ func (i *Item) renderElement(config LocalConfig) {
     t, _ := template.New("").Parse(string(b))
 
     if config.files {
-        file := fmt.Sprintf("%v-%v.tf", i.d.getName(), item)
+        file := fmt.Sprintf("%v-%v.tf", i.d.getName(), i.id)
         f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0755)
         if err != nil {
             log.Fatal(err)
