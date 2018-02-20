@@ -98,7 +98,9 @@ func (i *Item) renderElement(config LocalConfig) {
 	}
 
 	b, _ := Asset(i.d.getAsset())
-	t, _ := template.New("").Parse(string(b))
+	t, _ := template.New("").Funcs(template.FuncMap{
+		"escapeQuotes": escapeQuotes,
+	}).Parse(string(b))
 
 	if config.files {
 		file := fmt.Sprintf("%v-%v.tf", i.d.getName(), i.id)
@@ -115,6 +117,12 @@ func (i *Item) renderElement(config LocalConfig) {
 	} else {
 		t.Execute(os.Stdout, item)
 	}
+}
+
+// Escape single " symbol in the string with \" pair
+func escapeQuotes(line string) string {
+	line = strings.Replace(line, "\"", "\\\"", -1)
+	return line
 }
 
 func main() {
