@@ -17,22 +17,22 @@ go generate && go build
 # Examples
 Export all dashboards:
 ```bash
-DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf -all_dashboards
+DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf --dashboards
 ```
 
 Export one particular dashboard (where `1111` is the ID of the dashboard):
 ```bash
-DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf -dashboards 1111
+DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf --dashboards=1111
 ```
 
 Write dashboards to corresponding files:
 ```bash
-DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf -all_dashboards -files
+DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf --dashboards --files
 ```
 
 By analogy, datadog monitor can be exported with this command:
 ```bash
-DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf  -monitors 1706011
+DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf  --monitors=1706011
 ```
 
 You can find api/app keys in settings, under `Integrations -> API` section.

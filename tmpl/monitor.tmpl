@@ -4,7 +4,7 @@ resource "datadog_monitor" "{{ .Id }}" {
   message            = "{{ .Message }}"
   escalation_message = "{{ .Options.EscalationMessage }}"
 
-  query = "{{ .Query }}"
+  query = "{{ .Query | escapeQuotes }}"
 
   {{- with .Options }}
   {{ if .NotifyNoData }}notify_no_data    = {{ .NotifyNoData }}{{- end }}
