@@ -1,10 +1,12 @@
 resource "datadog_monitor" "{{ .Id }}" {
   name               = "{{ .Name }}"
   type               = "{{ .Type }}"
-  message            = "{{ .Message }}"
+  message            = <<EOT
+{{ .Message }}
+EOT
   escalation_message = "{{ .Options.EscalationMessage }}"
 
-  query = "{{ .Query | escapeQuotes }}"
+  query = {{ .Query | escapeCharacters }}
 
   {{- with .Options }}
   {{ if .NotifyNoData }}notify_no_data    = {{ .NotifyNoData }}{{- end }}
