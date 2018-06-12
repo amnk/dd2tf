@@ -5,13 +5,14 @@ package main
 import (
 	"bufio"
 	"fmt"
-	flag "github.com/spf13/pflag"
-	"gopkg.in/zorkian/go-datadog-api.v2"
 	"log"
 	"os"
 	"strconv"
 	"strings"
 	"text/template"
+
+	flag "github.com/spf13/pflag"
+	"gopkg.in/zorkian/go-datadog-api.v2"
 )
 
 func getAllDashboards(client datadog.Client) []Item {
@@ -99,7 +100,7 @@ func (i *Item) renderElement(config LocalConfig) {
 
 	b, _ := Asset(i.d.getAsset())
 	t, _ := template.New("").Funcs(template.FuncMap{
-		"escapeQuotes": escapeQuotes,
+		"escapeCharacters": escapeCharacters,
 	}).Parse(string(b))
 
 	if config.files {
@@ -119,10 +120,9 @@ func (i *Item) renderElement(config LocalConfig) {
 	}
 }
 
-// Escape single " symbol in the string with \" pair
-func escapeQuotes(line string) string {
-	line = strings.Replace(line, "\"", "\\\"", -1)
-	return line
+// Replace escaped quote with apostrophe
+func escapeCharacters(line string) string {
+	return strconv.Quote(line)
 }
 
 func main() {
