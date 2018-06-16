@@ -1,6 +1,9 @@
 resource "datadog_monitor" "{{ .Id }}" {
   name               = "{{ .Name }}"
   type               = "{{ .Type }}"
+  {{ if .Tags }}
+  tags               = [{{range .Tags}}"{{.}}",{{end}}]
+  {{- end }}
   message            = <<EOT
 {{ .Message }}
 EOT
