@@ -27,7 +27,7 @@ resource "datadog_timeboard" "{{ .Id }}" {
     request {
       q    = "{{ .Query -}}"
       {{ if .Type -}}type = "{{ .Type }}"{{- end }}
-      {{ if .Aggregator -}}aggregator = "{{ .Aggregator }}"{{- end}}
+      {{ if .Aggregator -}}{{ if ne "" (DeRefString .Aggregator) -}}aggregator = "{{ .Aggregator }}"{{- end}}{{- end}}
       {{ if .Style -}}{{- with .Style -}}
       style {
         {{if .Palette -}}palette = "{{ .Palette }}"{{- end}}
