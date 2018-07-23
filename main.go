@@ -101,6 +101,7 @@ func (i *Item) renderElement(config LocalConfig) {
 	b, _ := Asset(i.d.getAsset())
 	t, _ := template.New("").Funcs(template.FuncMap{
 		"escapeCharacters": escapeCharacters,
+		"DeRefString":      func(s *string) string { return *s },
 	}).Parse(string(b))
 
 	if config.files {
