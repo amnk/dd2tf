@@ -1,6 +1,1 @@
-# Ignore all
-*
-
-# Unignore all with extensions and templates directory
-!*.*
-!tmpl/
+bin/

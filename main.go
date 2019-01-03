@@ -11,7 +11,7 @@ import (
 	"text/template"
 
 	flag "github.com/spf13/pflag"
-	"gopkg.in/zorkian/go-datadog-api.v2"
+	"github.com/zorkian/go-datadog-api"
 )
 
 type LocalConfig struct {
@@ -22,7 +22,7 @@ type LocalConfig struct {
 }
 
 var config = LocalConfig{
-	components: []DatadogElement{Dashboard{}, Monitor{}},
+	components: []DatadogElement{Dashboard{}, Monitor{}, ScreenBoard{}},
 }
 
 type DatadogElement interface {
@@ -37,14 +37,18 @@ type Item struct {
 	d  DatadogElement
 }
 
-func (i *Item) renderElement(config LocalConfig) {
-	log.Debugf("Entering renderElement %v", i.id)
+func (i *Item) getElement(config LocalConfig) (interface{}, error) {
 	item, err := i.d.getElement(config.client, i.id)
 	if err != nil {
 		log.Debugf("Error while getting element %v", i.id)
 		log.Fatal(err)
 	}
+	return item, err
 
+}
+
+func (i *Item) renderElement(item interface{}, config LocalConfig) {
+	log.Debugf("Entering renderElement %v", i.id)
 	b, _ := Asset(i.d.getAsset())
 	t, _ := template.New("").Funcs(template.FuncMap{
 		"escapeCharacters": escapeCharacters,
@@ -160,7 +164,11 @@ func main() {
 			}
 			for _, element := range config.items {
 				log.Debugf("Exporting element %v", element.id)
-				element.renderElement(config)
+				fullElem, err := element.getElement(config)
+				if err != nil {
+					log.Fatal(err)
+				}
+				element.renderElement(fullElem, config)
 			}
 			os.Exit(0)
 
