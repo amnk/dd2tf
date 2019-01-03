@@ -9,8 +9,7 @@ Useful, if you had all dashboards configured adhoc and now want to follow DevOps
 # How to build
 Just run (GOPATH and sometimes GOBIN have to be set):
 ```bash
-go get -u github.com/jteeuwen/go-bindata/...
-go get gopkg.in/zorkian/go-datadog-api.v2
+dep ensure
 go generate && go build
 ```
 
@@ -30,9 +29,14 @@ Write dashboards to corresponding files:
 DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf dashboards --files --all
 ```
 
-By analogy, datadog monitor can be exported with this command:
+Datadog monitor can be exported with this command:
 ```bash
 DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf monitors --ids 1706011
+```
+
+And Datadog Screenboard:
+```bash
+DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf screenboards --all
 ```
 
 You can find api/app keys in settings, under `Integrations -> API` section.
