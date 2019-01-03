@@ -78,6 +78,7 @@ type SecondaryOptions struct {
 	ids   []int
 	files bool
 	all   bool
+	debug bool
 }
 
 func NewSecondaryOptions(cmd *flag.FlagSet) *SecondaryOptions {
@@ -85,14 +86,14 @@ func NewSecondaryOptions(cmd *flag.FlagSet) *SecondaryOptions {
 	cmd.IntSliceVar(&options.ids, "ids", []int{}, "IDs of the elements to fetch.")
 	cmd.BoolVar(&options.all, "all", false, "Export all available elements.")
 	cmd.BoolVar(&options.files, "files", false, "Save each element into a separate file.")
+	cmd.BoolVar(&options.debug, "debug", false, "Enable debug output.")
 	return options
 }
 
 func executeLogic(opts *SecondaryOptions, config *LocalConfig, component DatadogElement) {
 	config.files = opts.files //TODO: get rid of this ugly hack
 	if (len(opts.ids) == 0) && (opts.all == false) {
-		fmt.Println("Either --ids or --all should be specified")
-		os.Exit(2)
+		log.Fatal("Either --ids or --all should be specified")
 	} else if opts.all == true {
 		allElements, err := component.getAllElements(config.client)
 		if err != nil {
@@ -152,12 +153,16 @@ func main() {
 					client: *datadog.NewClient(datadogAPIKey, datadogAPPKey),
 				}
 
+				if subcommandOpts.debug {
+					log.SetLevel(log.DebugLevel)
+				}
 				executeLogic(subcommandOpts, &config, comp)
 			}
 			for _, element := range config.items {
 				log.Debugf("Exporting element %v", element.id)
 				element.renderElement(config)
 			}
+			os.Exit(0)
 
 		}
 		log.Fatalf("%q is not valid command.\n", os.Args[1])
