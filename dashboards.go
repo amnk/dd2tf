@@ -3,7 +3,7 @@
 package main
 
 import (
-	"gopkg.in/zorkian/go-datadog-api.v2"
+	"github.com/zorkian/go-datadog-api"
 )
 
 type Dashboard struct {
