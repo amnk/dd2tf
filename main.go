@@ -5,50 +5,31 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"strconv"
-	"strings"
 	"text/template"
 
 	flag "github.com/spf13/pflag"
 	"gopkg.in/zorkian/go-datadog-api.v2"
 )
 
-func getAllDashboards(client datadog.Client) []Item {
-	var ids []Item
-	dashboards, err := client.GetDashboards()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, elem := range dashboards {
-		ids = append(ids, Item{id: *elem.Id, d: Dashboard{}})
-	}
-	return ids
-}
-
-func getAllMonitors(client datadog.Client) []Item {
-	var ids []Item
-	monitors, err := client.GetMonitors()
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, elem := range monitors {
-		ids = append(ids, Item{id: *elem.Id, d: Monitor{}})
-	}
-	return ids
-}
-
 type LocalConfig struct {
-	client datadog.Client
-	items  []Item
-	files  bool
+	client     datadog.Client
+	items      []Item
+	files      bool
+	components []DatadogElement
+}
+
+var config = LocalConfig{
+	components: []DatadogElement{Dashboard{}, Monitor{}},
 }
 
 type DatadogElement interface {
 	getElement(client datadog.Client, i int) (interface{}, error)
 	getAsset() string
 	getName() string
+	getAllElements(client datadog.Client) ([]Item, error)
 }
 
 type Item struct {
@@ -56,45 +37,11 @@ type Item struct {
 	d  DatadogElement
 }
 
-type Dashboard struct {
-}
-
-func (d Dashboard) getElement(client datadog.Client, id int) (interface{}, error) {
-	dash, err := client.GetDashboard(id)
-	return dash, err
-}
-
-func (d Dashboard) getAsset() string {
-	return "tmpl/timeboard.tmpl"
-}
-
-func (d Dashboard) getName() string {
-	return "dashboard"
-}
-
-type Monitor struct {
-}
-
-func (m Monitor) getElement(client datadog.Client, id int) (interface{}, error) {
-	mon, err := client.GetMonitor(id)
-	return mon, err
-}
-
-func (m Monitor) getAsset() string {
-	return "tmpl/monitor.tmpl"
-}
-
-func (m Monitor) getName() string {
-	return "monitor"
-}
-
-type RenderableElement interface {
-	renderElement(config LocalConfig)
-}
-
 func (i *Item) renderElement(config LocalConfig) {
+	log.Debugf("Entering renderElement %v", i.id)
 	item, err := i.d.getElement(config.client, i.id)
 	if err != nil {
+		log.Debugf("Error while getting element %v", i.id)
 		log.Fatal(err)
 	}
 
@@ -105,6 +52,7 @@ func (i *Item) renderElement(config LocalConfig) {
 	}).Parse(string(b))
 
 	if config.files {
+		log.Debug("Creating file", i.d.getName(), i.id)
 		file := fmt.Sprintf("%v-%v.tf", i.d.getName(), i.id)
 		f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0755)
 		if err != nil {
@@ -126,53 +74,98 @@ func escapeCharacters(line string) string {
 	return strconv.Quote(line)
 }
 
+type SecondaryOptions struct {
+	ids   []int
+	files bool
+	all   bool
+	debug bool
+}
+
+func NewSecondaryOptions(cmd *flag.FlagSet) *SecondaryOptions {
+	options := &SecondaryOptions{}
+	cmd.IntSliceVar(&options.ids, "ids", []int{}, "IDs of the elements to fetch.")
+	cmd.BoolVar(&options.all, "all", false, "Export all available elements.")
+	cmd.BoolVar(&options.files, "files", false, "Save each element into a separate file.")
+	cmd.BoolVar(&options.debug, "debug", false, "Enable debug output.")
+	return options
+}
+
+func executeLogic(opts *SecondaryOptions, config *LocalConfig, component DatadogElement) {
+	config.files = opts.files //TODO: get rid of this ugly hack
+	if (len(opts.ids) == 0) && (opts.all == false) {
+		log.Fatal("Either --ids or --all should be specified")
+	} else if opts.all == true {
+		allElements, err := component.getAllElements(config.client)
+		if err != nil {
+			log.Fatal(err)
+		}
+		config.items = allElements
+		log.Debugf("Exporting all elements: %v", allElements)
+	} else {
+		log.Debug("Exporting selected elements")
+		for _, item := range opts.ids {
+			config.items = append(config.items, Item{id: item, d: component})
+		}
+	}
+}
+
+func usage() {
+	fmt.Printf("Usage: %v <subcommand> <subcommand_options>\n", os.Args[0])
+	fmt.Printf("\twhere <subcommand> is one of: %+v\n", config.components)
+	fmt.Println("Environment variables DATADOG_API_KEY and DATADOG_APP_KEY are required")
+}
+
 func main() {
-	var dashboards = flag.String("dashboards", "",
-		"IDs of dashboards, separated by comma. If no IDs are given, all dashboards are exported.")
-	flag.Lookup("dashboards").NoOptDefVal = "-1"
-	var monitors = flag.String("monitors", "",
-		"IDs of monitors, separated by comma. If no IDs are given, all monitors are exported.")
-	flag.Lookup("monitors").NoOptDefVal = "-1"
-	var files = flag.Bool("files", false, "Create file for each entity instead of stdout dump")
+	log.SetFormatter(&log.TextFormatter{})
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.WarnLevel)
+	log.RegisterExitHandler(usage)
 
-	flag.Parse()
+	if len(os.Args) < 2 {
+		log.Fatal("Not enough arguments to proceed")
+	} else {
+		//TODO: current approach means that we do selective parsing:
+		// * some arguments are parsed via os.Args, others - via pflag.Parse()
+		// * setting debug level output is complicated;
+		//
+		// This should be refactored using google/subcommands or something similar
 
-	datadog_api_key, ok := os.LookupEnv("DATADOG_API_KEY")
+		selected := os.Args[1]
+		for _, comp := range config.components {
+			if comp.getName() != selected {
+				continue
+			}
+			subcommand := flag.NewFlagSet(selected, flag.ExitOnError)
+			subcommandOpts := NewSecondaryOptions(subcommand)
+			subcommand.Parse(os.Args[2:])
+			if subcommand.Parsed() {
+				datadogAPIKey, ok := os.LookupEnv("DATADOG_API_KEY")
+				if !ok {
+					log.Fatal("Datadog API key not found, please make sure that DATADOG_API_KEY env variable is set")
+				}
 
-	if !ok {
-		log.Fatalf("Datadog API key not found, please make sure that DATADOG_API_KEY env variable is set")
-	}
+				datadogAPPKey, ok := os.LookupEnv("DATADOG_APP_KEY")
+				if !ok {
+					log.Fatal("Datadog APP key not found, please make sure that DATADOG_APP_KEY env variable is set")
+				}
 
-	datadog_app_key, ok := os.LookupEnv("DATADOG_APP_KEY")
-	if !ok {
-		log.Fatalf("Datadog APP key not found, please make sure that DATADOG_APP_KEY env variable is set")
-	}
+				config = LocalConfig{
+					client: *datadog.NewClient(datadogAPIKey, datadogAPPKey),
+				}
 
-	config := LocalConfig{
-		client: *datadog.NewClient(datadog_api_key, datadog_app_key),
-		files:  *files,
-	}
+				if subcommandOpts.debug {
+					log.SetLevel(log.DebugLevel)
+				}
+				executeLogic(subcommandOpts, &config, comp)
+			}
+			for _, element := range config.items {
+				log.Debugf("Exporting element %v", element.id)
+				element.renderElement(config)
+			}
+			os.Exit(0)
 
-	if *dashboards == "-1" {
-		config.items = append(config.items, getAllDashboards(config.client)...)
-	} else if !(*dashboards == "") {
-		for _, element := range strings.Split(*dashboards, ",") {
-			dash, _ := strconv.Atoi(element)
-			config.items = append(config.items, Item{id: dash, d: Dashboard{}})
 		}
-
+		log.Fatalf("%q is not valid command.\n", os.Args[1])
 	}
 
-	if *monitors == "-1" {
-		config.items = append(config.items, getAllMonitors(config.client)...)
-	} else if !(*monitors == "") {
-		for _, element := range strings.Split(*monitors, ",") {
-			mon, _ := strconv.Atoi(element)
-			config.items = append(config.items, Item{id: mon, d: Monitor{}})
-		}
-	}
-
-	for _, element := range config.items {
-		element.renderElement(config)
-	}
 }
