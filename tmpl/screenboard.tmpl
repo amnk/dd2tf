@@ -1,64 +1,61 @@
 resource "datadog_screenboard" "{{ .Id }}" {
-  title = "{{ .Title -}}"
-  {{ if .ReadOnly -}}
+  title = "{{ .Title }}"
+  {{- if .ReadOnly }}
   read_only = {{ .ReadOnly }}
-  {{- end -}}
-  {{ if .Shared -}}
+  {{- end }}
+  {{- if .Shared }}
   shared = {{ .Shared }}
   {{- end }}
-  {{ if .TemplateVariables -}}
-  {{- with .TemplateVariables -}}
-  {{- range . -}}
+  {{- if .TemplateVariables }}
+  {{- with .TemplateVariables }}
+  {{- range . }}
   template_variable {
     name    = "{{ .Name }}"
     prefix  = "{{ .Prefix }}"
     default = "{{ .Default }}" 
   }
-  {{- end -}}
-  {{- end -}}
-  {{- end -}}
+  {{- end }}
+  {{- end }}
+  {{- end }}
 
-  {{- with .Widgets -}}
-  {{- range . -}}
+  {{- with .Widgets }}
+  {{- range . }}
   widget {
     type = "{{ .Type }}"
     x = "{{ .X }}"
     y = "{{ .Y }}"
-    {{ if .Title -}}
-    title = "{{ .Title }}"
+    {{- if .Title }}
+    title = "{{ .TitleText }}"
     {{- end }}
-    {{ if .TitleText -}}
-    title_text = "{{ .TitleText }}"
-    {{- end }}
-    {{ if .TitleAlign -}}
+    {{- if .TitleAlign }}
     title_align = "{{ .TitleAlign }}"
     {{- end }}
-    {{ if .TitleSize -}}
+    {{- if .TitleSize }}
     title_size = "{{ .TitleSize }}"
     {{- end }}
-    {{ if .Height -}}
+    {{- if .Height }}
     height = "{{ .Height }}"
     {{- end }}
-    {{ if .Width -}}
+    {{- if .Width }}
     width = "{{ .Width }}"
     {{- end }}
-    {{- if .Text -}}
+    {{- if .Text }}
     text = "{{ .Text }}"
-    {{ end -}}
-    {{ if .Color -}}
+    {{- end }}
+    {{- if .Color }}
     color = "{{ .Color }}"
     {{- end }}
-    {{ if .Time -}}
-    {{- with .Time -}}
+    {{- if .Time }}
+    {{- with .Time }}
     time {
       live_span = "{{ .LiveSpan }}"
     }
-    {{ end -}}
-    {{ end -}}
-    {{ if .TileDef }}
-    {{- with .TileDef -}}
+    {{- end }}
+    {{- end }}
+    {{- if .TileDef }}
+    {{- with .TileDef }}
     tile_def {
-      {{ if .Viz -}}
+      {{- if .Viz }}
       viz = "{{ .Viz }}"
       {{- end }}
       {{- if .CustomUnit }}
@@ -70,89 +67,89 @@ resource "datadog_screenboard" "{{ .Id }}" {
       {{- if .TextAlign }}
       text_align = "{{ .TextAlign }}"
       {{- end }}
-      {{ if .Requests -}}
-      {{- with .Requests -}}
-      {{- range . -}}
+      {{- if .Requests }}
+      {{- with .Requests }}
+      {{- range . }}
       request {
-        {{ if .Query -}}
+        {{- if .Query }}
         q = "{{ .Query }}"
         {{- end }}
-        {{ if .Type -}}
+        {{- if .Type }}
         type = "{{ .Type }}"
         {{- end }}
-        {{ if .QueryType -}}
+        {{- if .QueryType }}
         query_type = "{{ .QueryType }}"
-        {{- end -}}
-        {{ if .Metric -}}
+        {{- end }}
+        {{- if .Metric }}
         metric = "{{ .Metric }}"
-        {{- end -}}
-        {{ if .TextFilter -}}
+        {{- end }}
+        {{- if .TextFilter }}
         text_filter = "{{ .TextFilter }}"
-        {{- end -}}
-        {{ if .Limit -}}
+        {{- end }}
+        {{- if .Limit }}
         limit = "{{ .Limit }}"
-        {{- end -}}
-        {{ if .Aggregator -}}
+        {{- end }}
+        {{- if .Aggregator }}
         aggregator = "{{ .Aggregator }}"
-        {{- end -}}
-        {{ if .CompareTo -}}
+        {{- end }}
+        {{- if .CompareTo }}
         compare_to = "{{ .CompareTo }}"
-        {{- end -}}
-        {{ if .ChangeType -}}
+        {{- end }}
+        {{- if .ChangeType }}
         change_type = "{{ .ChangeType }}"
-        {{- end -}}
-        {{ if .OrderBy -}}
+        {{- end }}
+        {{- if .OrderBy }}
         order_by = "{{ .OrderBy }}"
-        {{- end -}}
-        {{ if .OrderDir -}}
+        {{- end }}
+        {{- if .OrderDir }}
         order_dir = "{{ .OrderDir }}"
-        {{- end -}}
-        {{ if .ExtraCol -}}
+        {{- end }}
+        {{- if .ExtraCol }}
         extra_col = "{{ .ExtraCol }}"
-        {{- end -}}
-        {{ if .IncreaseGood -}}
+        {{- end }}
+        {{- if .IncreaseGood }}
         increase_good = "{{ .IncreaseGood }}"
         {{- end }}
-        {{ if .ConditionalFormats -}}
-        {{- with .ConditionalFormats }}
-        {{- range . -}}
+        {{- if .ConditionalFormats }}
+        {{- with .ConditionalFormats -}}
+        {{- range . }}
         conditional_format {
-          {{ if .Color -}}
+          {{- if .Color }}
           color = "{{ .Color }}"
-          {{- end -}}
-          {{ if .Palette -}}
+          {{- end }}
+          {{- if .Palette }}
           palette = "{{ .Palette }}"
           {{- end }}
-          {{ if .Comparator -}}
+          {{- if .Comparator }}
           comparator = "{{ .Comparator }}"
           {{- end }}
-          {{ if .Invert -}}
+          {{- if .Invert }}
           invert = "{{ .Invert }}"
-          {{- end -}}
-          {{ if .Value -}}
+          {{- end }}
+          {{- if .Value }}
           value = "{{ .Value }}"
-          {{- end -}}
-          {{ if .ImageURL -}}
+          {{- end }}
+          {{- if .ImageURL }}
           image_url = "{{ .ImageURL }}"
           {{- end }}
         }
-        {{- end -}} 
+        {{- end }} 
         {{- end }}
-        {{ end -}}
-        {{ if .Style -}}
-        {{- with .Style -}}
+        {{- end }}
+        {{- if .Style }}
+        {{- with .Style }}
         style {
-          {{ if .Palette -}}
+          {{- if .Palette }}
           palette = "{{ .Palette }}"
           {{- end }}
-          {{ if .Type -}}
+          {{- if .Type }}
           type = "{{ .Type }}"
           {{- end }}
-          {{ if .Width -}}
+          {{- if .Width }}
           width = "{{ .Width }}"
           {{- end }}
         } //style
-        {{- end -}}
+        {{- end }}
         {{- end }}
         {{- if .TagFilters }}
         tag_filters = [{{range .TagFilters}}"{{.}}",{{end}}]
@@ -163,7 +160,7 @@ resource "datadog_screenboard" "{{ .Id }}" {
       {{- end }}
       {{- if .Events -}}
       {{- with .Events -}}
-      {{- range . -}}
+      {{- range . }}
       event {
         q = "{{ .Query }}"
       } //event
@@ -171,171 +168,171 @@ resource "datadog_screenboard" "{{ .Id }}" {
       {{- end -}}
       {{- end -}}
 
-      {{- if .Markers -}}
-      {{- with .Markers -}}
-      {{- range . -}}
+      {{- if .Markers }}
+      {{- with .Markers }}
+      {{- range . }}
       marker {
-        {{- if .Type -}}
+        {{- if .Type }}
         type = "{{ .Type }}"
-        {{- end -}}
-        {{- if .Label -}}
+        {{- end }}
+        {{- if .Label }}
         label = "{{ .Label }}"
-        {{- end -}}
-        {{- if .Value -}}
+        {{- end }}
+        {{- if .Value }}
         value = "{{ .Value }}"
-        {{- end -}}
+        {{- end }}
       } //event
       {{- end }}
       {{- end }}
       {{- end }}
     } //tile_def
-    {{ end -}}
-    {{- end -}}
-    {{ if .TextSize -}}
+    {{- end }}
+    {{- end }}
+    {{- if .TextSize }}
     text_size = "{{ .TextSize }}"
-    {{ end -}}
-    {{- if .Unit -}}
+    {{- end }}
+    {{- if .Unit }}
     unit = "{{ .Unit }}"
-    {{- end -}}
-    {{- if .Precision -}}
+    {{- end }}
+    {{- if .Precision }}
     precision = "{{ .Precision }}"
-    {{- end -}}
-    {{ if .TextAlign -}}
+    {{- end }}
+    {{- if .TextAlign }}
     text_align = "{{ .TextAlign }}"
-    {{ end -}}
-    {{ if .FontSize -}}
+    {{- end }}
+    {{- if .FontSize }}
     font_size = "{{ .FontSize }}"
-    {{- end -}}
-    {{ if .AlertID -}}
+    {{- end }}
+    {{- if .AlertID }}
     alert_id = "{{ .AlertID }}"
-    {{ end -}}
-    {{ if .AutoRefresh -}}
+    {{- end }}
+    {{- if .AutoRefresh }}
     auto_refresh = "{{ .AutoRefresh }}"
-    {{ end -}}
-    {{ if .Legend -}}
+    {{- end }}
+    {{- if .Legend }}
     legend = "{{ .Legend }}"
-    {{ end -}}
-    {{ if .LegendSize -}}
+    {{- end }}
+    {{- if .LegendSize }}
     legend_size = "{{ .LegendSize }}"
-    {{ end -}}
-    {{- if .Query -}}
+    {{- end }}
+    {{- if .Query }}
     query = "{{ .Query }}"
-    {{- end -}}
-    {{- if .URL -}}
+    {{- end }}
+    {{- if .URL }}
     url = "{{ .URL }}"
-    {{- end -}}
-    {{- if .Check -}}
+    {{- end }}
+    {{- if .Check }}
     check = "{{ .Check }}"
-    {{- end -}}
-    {{- if .Grouping -}}
+    {{- end }}
+    {{- if .Grouping }}
     grouping = "{{ .Grouping }}"
-    {{- end -}}
-    {{- if .Group -}}
+    {{- end }}
+    {{- if .Group }}
     group = "{{ .Group }}"
-    {{- end -}}
-    {{- if .TickPos -}}
+    {{- end }}
+    {{- if .TickPos }}
     tick_pos = "{{ .TickPos }}"
-    {{- end -}}
-    {{- if .TickEdge -}}
+    {{- end }}
+    {{- if .TickEdge }}
     tick_edge = "{{ .TickEdge }}"
-    {{- end -}}
-    {{- if .HTML -}}
+    {{- end }}
+    {{- if .HTML }}
     html = "{{ .HTML }}"
-    {{- end -}}
-    {{- if .Tick -}}
+    {{- end }}
+    {{- if .Tick }}
     tick = "{{ .Tick }}"
-    {{- end -}}
-    {{- if .Bgcolor -}}
+    {{- end }}
+    {{- if .Bgcolor }}
     bgcolor = "{{ .Bgcolor }}"
-    {{- end -}}
-    {{- if .EventSize -}}
+    {{- end }}
+    {{- if .EventSize }}
     event_size = "{{ .EventSize }}"
-    {{- end -}}
-    {{- if .Sizing -}}
+    {{- end }}
+    {{- if .Sizing }}
     sizing = "{{ .Sizing }}"
-    {{- end -}}
-    {{- if .Margin -}}
+    {{- end }}
+    {{- if .Margin }}
     margin = "{{ .Margin }}"
-    {{- end -}}
-    {{- if .Env -}}
+    {{- end }}
+    {{- if .Env }}
     env = "{{ .Env }}"
-    {{- end -}}
-    {{- if .ServiceService -}}
+    {{- end }}
+    {{- if .ServiceService }}
     service_service = "{{ .ServiceService }}"
-    {{- end -}}
-    {{- if .ServiceName -}}
+    {{- end }}
+    {{- if .ServiceName }}
     service_name = "{{ .ServiceName }}"
-    {{- end -}}
-    {{- if .SizeVersion -}}
+    {{- end }}
+    {{- if .SizeVersion }}
     size_version = "{{ .SizeVersion }}"
-    {{- end -}}
-    {{- if .LayoutVersion -}}
+    {{- end }}
+    {{- if .LayoutVersion }}
     layout_version = "{{ .LayoutVersion }}"
-    {{- end -}}
-    {{- if .MustShowHits -}}
+    {{- end }}
+    {{- if .MustShowHits }}
     must_show_hits = "{{ .MustShowHits }}"
-    {{- end -}}
-    {{- if .MustShowErrors -}}
+    {{- end }}
+    {{- if .MustShowErrors }}
     must_show_errors = "{{ .MustShowErrors }}"
-    {{- end -}}
-    {{- if .MustShowLatency -}}
+    {{- end }}
+    {{- if .MustShowLatency }}
     must_show_latency = "{{ .MustShowLatency }}"
-    {{- end -}}
-    {{- if .MustShowBreakdown -}}
+    {{- end }}
+    {{- if .MustShowBreakdown }}
     must_show_breakdown = "{{ .MustShowBreakdown }}"
-    {{- end -}}
-    {{- if .MustShowDistribution -}}
+    {{- end }}
+    {{- if .MustShowDistribution }}
     must_show_distribution = "{{ .MustShowDistribution }}"
-    {{- end -}}
-    {{- if .MustShowResourceList -}}
+    {{- end }}
+    {{- if .MustShowResourceList }}
     must_show_resource_list = "{{ .MustShowResourceList }}"
-    {{- end -}}
-    {{ if .DisplayFormat -}}
+    {{- end }}
+    {{- if .DisplayFormat }}
     display_format = "{{ .DisplayFormat }}"
-    {{ end -}}
-    {{ if .ColorPreference -}}
-    color_preferences = "{{ .ColorPreference }}"
-    {{ end -}}
-    {{ if .HideZeroCounts -}}
+    {{- end }}
+    {{- if .ColorPreference }}
+    color_preference = "{{ .ColorPreference }}"
+    {{- end }}
+    {{- if .HideZeroCounts }}
     hide_zero_counts = "{{ .HideZeroCounts }}"
-    {{ end -}}
-    {{ if .ManageStatusShowTitle -}}
+    {{- end }}
+    {{- if .ManageStatusShowTitle }}
     manage_status_show_title = "{{ .ManageStatusShowTitle }}"
-    {{ end -}}
-    {{ if .ManageStatusTitleText -}}
+    {{- end }}
+    {{- if .ManageStatusTitleText }}
     manage_status_title_text = "{{ .ManageStatusTitleText }}"
-    {{ end -}}
-    {{ if .ManageStatusTitleSize -}}
+    {{- end }}
+    {{- if .ManageStatusTitleSize }}
     manage_status_title_size = "{{ .ManageStatusTitleSize }}"
-    {{ end -}}
-    {{ if .ManageStatusTitleAlign -}}
+    {{- end }}
+    {{- if .ManageStatusTitleAlign }}
     manage_status_title_align = "{{ .ManageStatusTitleAlign }}"
-    {{ end -}}
-    {{- if .Params -}}
+    {{- end }}
+    {{- if .Params }}
     {{- with .Params }}
     params {
       {{- if .Sort }}
       sort = "{{ .Sort }}"
-      {{- end -}}
+      {{- end }}
       {{- if .Text }}
       text = "{{ .Text }}"
-      {{- end -}}
+      {{- end }}
       {{- if .Count }}
       count = "{{ .Count }}"
-      {{- end -}}
+      {{- end }}
       {{- if .Start }}
       start = "{{ .Start }}"
-      {{- end -}}
+      {{- end }}
     }
-    {{- end -}}
-    {{- end -}}
+    {{- end }}
+    {{- end }}
     {{- if .Columns }}
-    columns = "{{ .Columns }}"
-    {{ end -}}
-    {{- if .Logset -}}
+    columns = {{ .Columns | escapeCharacters }}
+    {{- end }}
+    {{- if .Logset }}
     logset = "{{ .Logset }}"
     {{- end }}
   } //widget
-  {{- end -}}
-  {{ end }}
+  {{- end }}
+  {{- end }}
 }

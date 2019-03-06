@@ -66,12 +66,11 @@ func Example() {
 	//     type = "query_value"
 	//     x = "1"
 	//     y = "1"
-	//     title = "true"
-	//     title_text = "Test title"
+	//     title = "Test title"
+	//     title_align = "right"
 	//     title_size = "16"
 	//     height = "5"
 	//     width = "5"
-	//     title_align = "right"
 	//     time {
 	//       live_span = "1d"
 	//     }
