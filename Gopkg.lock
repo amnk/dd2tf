@@ -59,14 +59,6 @@
   pruneopts = "UT"
   revision = "82a175fd1598e8a172e58ebdf5ed262bb29129e5"
 
-[[projects]]
-  digest = "1:aa7ab4fd27851221e4153921472ef7e3c1b048eaacca8e87c73fb7a094250dd7"
-  name = "gopkg.in/zorkian/go-datadog-api.v2"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "f3f6d2f4859047aae0cac1ce3d16689608480fd9"
-  version = "v2.18.0"
-
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -74,7 +66,6 @@
     "github.com/sirupsen/logrus",
     "github.com/spf13/pflag",
     "github.com/zorkian/go-datadog-api",
-    "gopkg.in/zorkian/go-datadog-api.v2",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
