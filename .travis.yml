@@ -1,18 +1,35 @@
 language: go
-
 env:
+  global:
   - DEP_VERSION=0.5.0
-
+  - secure: 
 before_install:
   - curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 -o $GOPATH/bin/dep
   - chmod +x $GOPATH/bin/dep
-
+  - go get -u github.com/containous/go-bindata/...
 go:
-  - 1.11
+  - 1.11.9
   - master
 
-matrix:
-  fast_finish: true
+before_deploy:
+  - dep ensure && go generate 
+  - GOOS=darwin GOARCH=amd64 go build -o bin/dd2tf-darwin-amd64
+  - GOOS=linux GOARCH=amd64 go build -o bin/dd2tf-linux-amd64
+
+deploy:
+  provider: releases
+  api_key:
+    secure: fY/WknOrIOG3AusZLioA98T+5Mt5pD4xnWbL5f7Wv9OBXIs362Q3YfoPD9Q++FTbxBHDsB5DKu8KvJOicjCdnIS3UOthZvs1s3Jh+3Nmu6uSFMwweLyETsMxEbdguSzp96nk23/3l4RS4YdpgswS5GnAHOOjryuwST08YpVscCkphT9blR+m8TnkrT/8Rj5Rev4sYXtR8g+/F0PlKyAypHOppwNAFeFj9mvWG5JKCzhl3+867LgPdOKBDNJwtmzikggLrHw2F5QvTWdVm6v30xzeqx71pe5AFPo7WYO4IWk5orkcDX1rLx8mZIUAw8LJ2Ou9ybIDL0wzSINrpm2vMSqlpSPklDmvAR2g5LgK1TXzwAM7uzxcFMZTHqNvDswuVOHBj3EUnyfzSLvRONi+ii0kYbhYqO5ddQXRVLTZkYY3rzmeVTAfpe1Yv1V+kXbuSJc8+epc89X8gkjIxKSN/yxlJIclNwXIVPGn3y+iOCZEhTA1+aVjYT11g11r8ih70NKQ/vAtnlyqsW/DD4YIWt5irjUak/dA5bccwSm3J2MfG3zIOS0m9p3CGp5bVKNtKry9a5a9bmF+VvNpMetpkdfFBzSrskP5wydvGRxSarmsTJ18yjbsKBbgbXklCq8LnHpFZ+4kpbduKkpjoQcY7Q9++G35dAeUwpISJSHHnQE=
+  file: 
+    - bin/dd2tf-darwin-amd64
+    - bin/dd2tf-linux-amd64
+  on:
+    repo: amnk/dd2tf
+    tags: true
+    branch: master
+    go: 1.11.9
+  skip-cleanup: true
 
 notifications:
   email: false
+
