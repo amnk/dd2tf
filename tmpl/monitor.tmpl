@@ -7,7 +7,9 @@ resource "datadog_monitor" "{{ .Id }}" {
   message            = <<EOT
 {{ .Message }}
 EOT
-  escalation_message = "{{ .Options.EscalationMessage }}"
+  escalation_message = <<EOT
+{{ .Options.EscalationMessage }}
+EOT
 
   query = {{ .Query | escapeCharacters }}
 
