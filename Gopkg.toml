@@ -37,10 +37,6 @@
   name = "github.com/zorkian/go-datadog-api"
   version = "2.18.0"
 
-[[constraint]]
-  name = "gopkg.in/zorkian/go-datadog-api.v2"
-  version = "2.18.0"
-
 [prune]
   go-tests = true
   unused-packages = true
