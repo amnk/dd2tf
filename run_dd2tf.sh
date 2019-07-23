@@ -1,6 +1,6 @@
 #!/bin/bash
 
-usage() { 
+usage() {
 	echo -e "\nUsage:\n./run_dd2tf.sh [dd2tf_arguments] \n" 
 } 
 
@@ -9,13 +9,18 @@ if [ $# -le 1 ] || [[ ( $# == "--help") ||  $# == "-h" ]]
 then 
     usage
     exit 1
-fi 
+fi
+
+if [[ -z "${DATADOG_APP_KEY}" ]] || [[ -z "${DATADOG_APP_KEY}" ]]
+then
+    echo -e "You must export DATADOG_API_KEY and DATADOG_APP_KEY environment variables to use this image\n"
+    usage
+    exit 2
+fi
 
 declare -r IMAGE_NAME="amnk/dd2tf"
 declare -r IMAGE_TAG="latest"
-declare -r DATADOG_API_KEY=xxx
-declare -r DATADOG_APP_KEY=xxx
 
 echo "Starting container for image '$IMAGE_NAME:$IMAGE_TAG'"
-docker run -e DATADOG_API_KEY=$DATADOG_API_KEY -e DATADOG_APP_KEY=$DATADOG_APP_KEY -v ${PWD}/exports:/app $IMAGE_NAME:$IMAGE_TAG $@
+docker run -e DATADOG_API_KEY=$DATADOG_API_KEY -e DATADOG_APP_KEY=$DATADOG_APP_KEY $IMAGE_NAME:$IMAGE_TAG $@
 
