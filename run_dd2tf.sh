@@ -25,5 +25,5 @@ declare -r IMAGE_TAG="latest"
 echo "Starting container for image '$IMAGE_NAME:$IMAGE_TAG'"
 
 # run the docker container, passing any additional arguments to ./run_dd2tf.sh as arguments to the container and thus dd2tf binary
-docker run -e DATADOG_API_KEY=$DATADOG_API_KEY -e DATADOG_APP_KEY=$DATADOG_APP_KEY $IMAGE_NAME:$IMAGE_TAG $@
+docker run -e DATADOG_API_KEY=$DATADOG_API_KEY -e DATADOG_APP_KEY=$DATADOG_APP_KEY -v exports:/app/exports $IMAGE_NAME:$IMAGE_TAG $@
 
