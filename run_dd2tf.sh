@@ -19,6 +19,11 @@ then
     exit 2
 fi
 
+# create exports directory for use with dd2tf --files argument
+if [ ! -d "${PWD}/exports" ]; then
+    mkdir ${PWD}/exports
+fi
+
 declare -r IMAGE_NAME="amnk/dd2tf"
 declare -r IMAGE_TAG="latest"
 
