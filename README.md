@@ -7,9 +7,8 @@ Requires `DATADOG_API_KEY` and `DATADOG_APP_KEY` environment variables.
 Useful, if you had all dashboards configured adhoc and now want to follow DevOps style :)
 
 # How to build
-Just run (GOPATH and sometimes GOBIN have to be set):
+Just run:
 ```bash
-dep ensure
 go generate && go build
 ```
 
