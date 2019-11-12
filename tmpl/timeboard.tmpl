@@ -1,4 +1,4 @@
-resource "datadog_timeboard" "{{ .Id }}" {
+resource "datadog_timeboard" "dd_{{ .Id }}" {
   title       = "{{ .Title }}"
   description = "{{ .Description }}"
   read_only   = {{ .ReadOnly -}}
