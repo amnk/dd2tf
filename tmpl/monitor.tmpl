@@ -41,7 +41,7 @@ EOT
 
   {{- if .Thresholds }}
   {{- with .Thresholds }}
-  thresholds {
+  thresholds = {
     {{- if .Ok }}
     ok = {{ .Ok }}
     {{- end }}

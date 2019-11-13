@@ -4,7 +4,7 @@ resource "datadog_timeboard" "dd_{{ .Id }}" {
   read_only   = {{ .ReadOnly -}}
   {{with .Graphs -}}
   {{range . }}
-  graph {
+  graph = {
     title = "{{ .Title }}"
     {{with .Definition -}}
     viz   = "{{ .Viz -}}"
@@ -13,30 +13,30 @@ resource "datadog_timeboard" "dd_{{ .Id }}" {
     {{- if .Groups -}}group = [{{$groups := .Groups}}{{range $index, $elem := .Groups}}{{if $index}},{{end}}"{{$elem}}"{{end}}]{{- end}}
     {{- if .Scopes -}}scope = [{{$scopes := .Scopes}}{{range $index, $elem := .Scopes}}{{if $index}},{{end}}"{{$elem}}"{{end}}]{{- end}}
     {{- if .Style -}}
-    style {
+    style = {
       palette      = "{{ .Style.Palette }}"
       palette_flip = "{{ .Style.PaletteFlip }}"
     }{{- end}}
     {{- if .Markers -}}{{- with .Markers -}}{{range .}}
-    marker {
+    marker = {
       type  = "{{ .Type }}"
       value = "{{ .Value }}"
       {{ if .Label -}}label = "{{ .Label }}"{{- end}}
     }{{- end}}{{- end}}{{- end}}
     {{- with .Requests -}}{{range .}}
-    request {
+    request = {
       q    = "{{ .Query -}}"
       {{ if .Type -}}type = "{{ .Type }}"{{ end }}
       {{ if .Aggregator -}}{{ if ne "" (DeRefString .Aggregator) -}}aggregator = "{{ .Aggregator }}"{{ end}}{{ end -}}
       {{ if .Style -}}{{ with .Style }}
-      style {
+      style = {
         {{if .Palette -}}palette = "{{ .Palette }}"{{- end}}
         {{if .Width -}}width = "{{ .Width }}"{{- end}}
         {{if .Type -}}type = "{{ .Type }}"{{- end}}
       }
       {{ end -}}{{ end}}
       {{- if .ConditionalFormats }}{{- with .ConditionalFormats }}{{- range . -}}
-      conditional_format {
+      conditional_format = {
         {{ if .Palette }}palette = "{{ .Palette }}"{{ end }}
         comparator = "{{ .Comparator }}"
         {{- if .Value }}value = "{{ .Value }}"{{ end }}
@@ -51,7 +51,7 @@ resource "datadog_timeboard" "dd_{{ .Id }}" {
   }{{end}}{{- end}}
   {{- with .TemplateVariables -}}{{- range . }}
 
-  template_variable {
+  template_variable = {
     name    = "{{ .Name }}"
     prefix  = "{{ .Prefix }}"
     default = "{{ .Default }}" 
