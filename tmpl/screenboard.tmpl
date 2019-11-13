@@ -9,10 +9,10 @@ resource "datadog_screenboard" "dd_{{ .Id }}" {
   {{- if .TemplateVariables }}
   {{- with .TemplateVariables }}
   {{- range . }}
-  template_variable = {
+  template_variable {
     name    = "{{ .Name }}"
     prefix  = "{{ .Prefix }}"
-    default = "{{ .Default }}" 
+    default = "{{ .Default }}"
   }
   {{- end }}
   {{- end }}
@@ -20,7 +20,7 @@ resource "datadog_screenboard" "dd_{{ .Id }}" {
 
   {{- with .Widgets }}
   {{- range . }}
-  widget = {
+  widget {
     type = "{{ .Type }}"
     x = "{{ .X }}"
     y = "{{ .Y }}"
@@ -47,14 +47,14 @@ resource "datadog_screenboard" "dd_{{ .Id }}" {
     {{- end }}
     {{- if .Time }}
     {{- with .Time }}
-    time = {
+    time {
       live_span = "{{ .LiveSpan }}"
     }
     {{- end }}
     {{- end }}
     {{- if .TileDef }}
     {{- with .TileDef }}
-    tile_def = {
+    tile_def {
       {{- if .Viz }}
       viz = "{{ .Viz }}"
       {{- end }}
@@ -70,7 +70,7 @@ resource "datadog_screenboard" "dd_{{ .Id }}" {
       {{- if .Requests }}
       {{- with .Requests }}
       {{- range . }}
-      request = {
+      request {
         {{- if .Query }}
         q = "{{ .Query }}"
         {{- end }}
@@ -113,7 +113,7 @@ resource "datadog_screenboard" "dd_{{ .Id }}" {
         {{- if .ConditionalFormats }}
         {{- with .ConditionalFormats -}}
         {{- range . }}
-        conditional_format = {
+        conditional_format {
           {{- if .Color }}
           color = "{{ .Color }}"
           {{- end }}
@@ -133,7 +133,7 @@ resource "datadog_screenboard" "dd_{{ .Id }}" {
           image_url = "{{ .ImageURL }}"
           {{- end }}
         }
-        {{- end }} 
+        {{- end }}
         {{- end }}
         {{- end }}
         {{- if .Style }}
@@ -161,7 +161,7 @@ resource "datadog_screenboard" "dd_{{ .Id }}" {
       {{- if .Events -}}
       {{- with .Events -}}
       {{- range . }}
-      event = {
+      event {
         q = "{{ .Query }}"
       } //event
       {{- end -}}
@@ -171,7 +171,7 @@ resource "datadog_screenboard" "dd_{{ .Id }}" {
       {{- if .Markers }}
       {{- with .Markers }}
       {{- range . }}
-      marker = {
+      marker {
         {{- if .Type }}
         type = "{{ .Type }}"
         {{- end }}
@@ -310,7 +310,7 @@ resource "datadog_screenboard" "dd_{{ .Id }}" {
     {{- end }}
     {{- if .Params }}
     {{- with .Params }}
-    params = {
+    params {
       {{- if .Sort }}
       sort = "{{ .Sort }}"
       {{- end }}
