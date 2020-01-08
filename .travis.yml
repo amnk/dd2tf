@@ -1,14 +1,14 @@
 language: go
 env:
   global:
-  - DEP_VERSION=0.5.0
+  - DEP_VERSION=0.5.4
   - secure: 
 before_install:
   - curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 -o $GOPATH/bin/dep
   - chmod +x $GOPATH/bin/dep
   - go get -u github.com/containous/go-bindata/...
 go:
-  - 1.11.9
+  - "1.14"
   - master
 
 before_deploy:
@@ -19,17 +19,13 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: fY/WknOrIOG3AusZLioA98T+5Mt5pD4xnWbL5f7Wv9OBXIs362Q3YfoPD9Q++FTbxBHDsB5DKu8KvJOicjCdnIS3UOthZvs1s3Jh+3Nmu6uSFMwweLyETsMxEbdguSzp96nk23/3l4RS4YdpgswS5GnAHOOjryuwST08YpVscCkphT9blR+m8TnkrT/8Rj5Rev4sYXtR8g+/F0PlKyAypHOppwNAFeFj9mvWG5JKCzhl3+867LgPdOKBDNJwtmzikggLrHw2F5QvTWdVm6v30xzeqx71pe5AFPo7WYO4IWk5orkcDX1rLx8mZIUAw8LJ2Ou9ybIDL0wzSINrpm2vMSqlpSPklDmvAR2g5LgK1TXzwAM7uzxcFMZTHqNvDswuVOHBj3EUnyfzSLvRONi+ii0kYbhYqO5ddQXRVLTZkYY3rzmeVTAfpe1Yv1V+kXbuSJc8+epc89X8gkjIxKSN/yxlJIclNwXIVPGn3y+iOCZEhTA1+aVjYT11g11r8ih70NKQ/vAtnlyqsW/DD4YIWt5irjUak/dA5bccwSm3J2MfG3zIOS0m9p3CGp5bVKNtKry9a5a9bmF+VvNpMetpkdfFBzSrskP5wydvGRxSarmsTJ18yjbsKBbgbXklCq8LnHpFZ+4kpbduKkpjoQcY7Q9++G35dAeUwpISJSHHnQE=
+    secure: DvRDlaPJxEnejl+chn7CJUFzYi9QrWXSMwHrXMP/2IybFUd0qUTj9Dy3099HjRfyH9BVQSjuvk4DI8P3wmpL2/wTN+O28H6Ik7Monm5wpm1b2sXUoiI2kL6k36VaJNXlLfcjGjK7sM2RfAPwaDS0b1NBtoYgBicZXH9UD3jyeAiDI3mZI2mqwieC1Essb23X5rOf7o6VjZb/fY6tPU7dbDpiSMCF+l21VwrHr8DSJ0bxakMN5bfsd3YBWeG6RfoNGvb+qWVDXylXVXjIQqBrbtouGN0jzav6qqUn/Zhuw6ODgpVqBNTpZrMIHW3vKslTI45890muTowiIwwu2EAUrBouKZywz5yNXoYgTJ4q8QOTz1gGFRp/hAKysrOUhOtltr17btpQG6i34vI7hAV9fCVfsopCYZrMH/rbP72vcijxeOmmnyAkeGPq0ui+ErFJobvRuu93FoVrwwTHPFXoLmHeWfh3dMk/WpL3YOd+o/WfOTV8X8r8HBl2lgY4He9ZlEX8H4NdOSexH4mI+QGrJ/u24J4q57iZmqBOF4Utl32Hgu49vRDjD6Od2g2bQ6EO83F9bo+AY6yunuPxm4Hy+IuP4w6h++xbieAqUAhl+PkDlq2hWRDIVWIuGsICs5NkkapdtMqPL23qUpRwlLXeSj5ueGhA6EhvtVhSQ2Wp7U4=
   file: 
     - bin/dd2tf-darwin-amd64
     - bin/dd2tf-linux-amd64
   on:
-    repo: amnk/dd2tf
+    repo: toozej/dd2tf
     tags: true
     branch: master
-    go: 1.11.9
+    go: "1.14"
   skip-cleanup: true
-
-notifications:
-  email: false
-

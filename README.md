@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/amnk/dd2tf.svg?branch=master)](https://travis-ci.org/amnk/dd2tf)
+[![Build Status](https://travis-ci.org/toozej/dd2tf.svg?branch=master)](https://travis-ci.org/toozej/dd2tf)
 
 A simple utility to convert DataDog dashboards and/or monitors to Terraform format. 
 
@@ -11,6 +11,7 @@ Just run (GOPATH and sometimes GOBIN have to be set):
 ```bash
 dep ensure
 go generate && go build
+go install
 ```
 
 # Examples
