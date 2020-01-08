@@ -8,7 +8,7 @@ before_install:
   - chmod +x $GOPATH/bin/dep
   - go get -u github.com/containous/go-bindata/...
 go:
-  - "1.14"
+  - "1.13.5"
   - master
 
 before_deploy:
@@ -27,5 +27,5 @@ deploy:
     repo: toozej/dd2tf
     tags: true
     branch: master
-    go: "1.14"
+    go: "1.13.5"
   skip-cleanup: true
