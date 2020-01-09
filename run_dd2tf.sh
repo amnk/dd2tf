@@ -24,11 +24,22 @@ if [ ! -d "${PWD}/exports" ]; then
     mkdir ${PWD}/exports
 fi
 
-declare -r IMAGE_NAME="toozej/dd2tf"
-declare -r IMAGE_TAG="latest"
+echo "Starting export of Datadog files to Terraform configs..."
 
-echo "Starting container for image '$IMAGE_NAME:$IMAGE_TAG'"
+# run the dd2tf docker container, passing any additional arguments to ./run_dd2tf.sh as arguments to the container and thus dd2tf binary
+docker run --rm -e DATADOG_API_KEY=$DATADOG_API_KEY -e DATADOG_APP_KEY=$DATADOG_APP_KEY -v ${PWD}/exports:/app/exports toozej/dd2tf:latest $@
 
-# run the docker container, passing any additional arguments to ./run_dd2tf.sh as arguments to the container and thus dd2tf binary
-docker run -e DATADOG_API_KEY=$DATADOG_API_KEY -e DATADOG_APP_KEY=$DATADOG_APP_KEY -v ${PWD}/exports:/app/exports $IMAGE_NAME:$IMAGE_TAG $@
+# if exports is empty, exit 3
+if [ ! "$(ls -A ${PWD}/exports)" ]; then
+    echo -e "${PWD}/exports/ directory is empty, this means the dd2tf export failed. Check log messages above.\n"
+    exit 3
+fi
 
+
+echo "Datadog files exported. Initializing Terraform..."
+# initialize Terraform in the exports/ directory
+docker run --rm -v ${PWD}/exports:/app/exports -w /app/exports -e DATADOG_API_KEY=$DATADOG_API_KEY -e DATADOG_APP_KEY=$DATADOG_APP_KEY hashicorp/terraform:light init
+
+echo "Terraform initialized. Validating exported Datadog files are valid Terraform configs..."
+# validate Terraform files in the exports/ directory
+docker run --rm -v ${PWD}/exports:/app/exports -w /app/exports -e DATADOG_API_KEY=$DATADOG_API_KEY -e DATADOG_APP_KEY=$DATADOG_APP_KEY hashicorp/terraform:light validate
