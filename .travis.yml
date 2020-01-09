@@ -2,30 +2,28 @@ language: go
 env:
   global:
   - DEP_VERSION=0.5.4
-  - secure: 
 before_install:
-  - curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64 -o $GOPATH/bin/dep
-  - chmod +x $GOPATH/bin/dep
-  - go get -u github.com/containous/go-bindata/...
+- curl -L -s https://github.com/golang/dep/releases/download/v${DEP_VERSION}/dep-linux-amd64
+  -o $GOPATH/bin/dep
+- chmod +x $GOPATH/bin/dep
+- go get -u github.com/go-bindata/go-bindata/...
 go:
-  - "1.13.5"
-  - master
-
+- 1.13.5
+- master
 before_deploy:
-  - dep ensure && go generate 
-  - GOOS=darwin GOARCH=amd64 go build -o bin/dd2tf-darwin-amd64
-  - GOOS=linux GOARCH=amd64 go build -o bin/dd2tf-linux-amd64
-
+- dep ensure && go generate
+- GOOS=darwin GOARCH=amd64 go build -o bin/dd2tf-darwin-amd64
+- GOOS=linux GOARCH=amd64 go build -o bin/dd2tf-linux-amd64
 deploy:
   provider: releases
   api_key:
-    secure: DvRDlaPJxEnejl+chn7CJUFzYi9QrWXSMwHrXMP/2IybFUd0qUTj9Dy3099HjRfyH9BVQSjuvk4DI8P3wmpL2/wTN+O28H6Ik7Monm5wpm1b2sXUoiI2kL6k36VaJNXlLfcjGjK7sM2RfAPwaDS0b1NBtoYgBicZXH9UD3jyeAiDI3mZI2mqwieC1Essb23X5rOf7o6VjZb/fY6tPU7dbDpiSMCF+l21VwrHr8DSJ0bxakMN5bfsd3YBWeG6RfoNGvb+qWVDXylXVXjIQqBrbtouGN0jzav6qqUn/Zhuw6ODgpVqBNTpZrMIHW3vKslTI45890muTowiIwwu2EAUrBouKZywz5yNXoYgTJ4q8QOTz1gGFRp/hAKysrOUhOtltr17btpQG6i34vI7hAV9fCVfsopCYZrMH/rbP72vcijxeOmmnyAkeGPq0ui+ErFJobvRuu93FoVrwwTHPFXoLmHeWfh3dMk/WpL3YOd+o/WfOTV8X8r8HBl2lgY4He9ZlEX8H4NdOSexH4mI+QGrJ/u24J4q57iZmqBOF4Utl32Hgu49vRDjD6Od2g2bQ6EO83F9bo+AY6yunuPxm4Hy+IuP4w6h++xbieAqUAhl+PkDlq2hWRDIVWIuGsICs5NkkapdtMqPL23qUpRwlLXeSj5ueGhA6EhvtVhSQ2Wp7U4=
-  file: 
-    - bin/dd2tf-darwin-amd64
-    - bin/dd2tf-linux-amd64
+    secure: mr2XfYKTeH0EE1zdG++D9GIZFC/gVi/0L90uIOGitfHZ8lqQOXbPzdhosoQBxl8CgK5XVpRe7z5WqGYjhff3SNxYiy/WzUAPyItLemo5Urnr5tV7dyjtMT2EE71lmBAJ1rMZTBrOk1uA08m2eXNW5rz+4ZvaoPZBXkDcE7rVzjBRi13IQGWzn5c2NkmPgUxPjjbhzCEJzKuSnnTo1Rs98t5OuVag5QV08bOlNbGkeQXYBE6LcLPZqi3bXkFbAoqU+1bWU7mZXxxoCopyn7RKCa+06B+RTMwjqTQeSaktMSnuAM+FUMjLiqD6myqW2s4FBKhVd4VAlxYMDJ2gZ/YYBlAvwFLDwc4uwrTFpwdyH8cSYybof+BXAsGDrlMVXZhvylftyri79XlYN/VW9waTEWSTn4wJB8jeC7YW6GYdUbfkNxtvbH4a6vPtPkZyo+MECaHfkco18GfQfRGjtPcW8ct3pwZoXo+DJWPxZ/Y5JOQibW0Dka97vLM2GM6OvrORFSrEY4lNgMQVwWwBI7tSKAF8vgUqnCGGZ1YHFJBF4USi7I1Aqs7a1bD+M4cvBk9oJS/YKcGgw2QxzH7prttMBV+ssFShuC+BIhbjWGRAnUolNbb5yIAs8ZrN+q8JLGEda4YHiSHuoSGYR1wLfONWRyKvSWjxeLAyt5XRdLHEobI=
+  file:
+  - bin/dd2tf-darwin-amd64
+  - bin/dd2tf-linux-amd64
   on:
     repo: toozej/dd2tf
     tags: true
     branch: master
-    go: "1.13.5"
+    go: 1.13.5
   skip-cleanup: true

@@ -12,7 +12,7 @@ then
 fi
 
 # if the required DATADOG app and api keys aren't exported as Bash variables, display usage message and exit
-if [[ -z "${DATADOG_APP_KEY}" ]] || [[ -z "${DATADOG_APP_KEY}" ]]
+if [[ -z "${DATADOG_APP_KEY}" ]] || [[ -z "${DATADOG_API_KEY}" ]]
 then
     echo -e "You must export DATADOG_API_KEY and DATADOG_APP_KEY environment variables to use this image\n"
     usage
