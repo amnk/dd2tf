@@ -4,13 +4,14 @@ package main
 
 import (
 	"github.com/zorkian/go-datadog-api"
+	"strconv"
 )
 
 type ScreenBoard struct {
 }
 
-func (s ScreenBoard) getElement(client datadog.Client, id int) (interface{}, error) {
-	elem, err := client.GetScreenboard(*datadog.Int(id))
+func (s ScreenBoard) getElement(client datadog.Client, id string) (interface{}, error) {
+	elem, err := client.GetScreenboard(id)
 	return elem, err
 }
 
@@ -33,7 +34,7 @@ func (s ScreenBoard) getAllElements(client datadog.Client) ([]Item, error) {
 		return ids, err
 	}
 	for _, elem := range dashboards {
-		ids = append(ids, Item{id: *elem.Id, d: ScreenBoard{}})
+		ids = append(ids, Item{id: strconv.Itoa(*elem.Id), d: ScreenBoard{}})
 	}
 	return ids, nil
 }

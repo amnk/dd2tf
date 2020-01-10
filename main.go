@@ -26,14 +26,14 @@ var config = LocalConfig{
 }
 
 type DatadogElement interface {
-	getElement(client datadog.Client, i int) (interface{}, error)
+	getElement(client datadog.Client, i string) (interface{}, error)
 	getAsset() string
 	getName() string
 	getAllElements(client datadog.Client) ([]Item, error)
 }
 
 type Item struct {
-	id int
+	id string
 	d  DatadogElement
 }
 
@@ -79,7 +79,7 @@ func escapeCharacters(line string) string {
 }
 
 type SecondaryOptions struct {
-	ids   []int
+	ids   []string
 	files bool
 	all   bool
 	debug bool
@@ -87,7 +87,7 @@ type SecondaryOptions struct {
 
 func NewSecondaryOptions(cmd *flag.FlagSet) *SecondaryOptions {
 	options := &SecondaryOptions{}
-	cmd.IntSliceVar(&options.ids, "ids", []int{}, "IDs of the elements to fetch.")
+	cmd.StringSliceVar(&options.ids, "ids", []string{}, "IDs of the elements to fetch.")
 	cmd.BoolVar(&options.all, "all", false, "Export all available elements.")
 	cmd.BoolVar(&options.files, "files", false, "Save each element into a separate file.")
 	cmd.BoolVar(&options.debug, "debug", false, "Enable debug output.")
