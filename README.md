@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/amnk/dd2tf.svg?branch=master)](https://travis-ci.org/amnk/dd2tf)
 
-A simple utility to convert DataDog dashboards and/or monitors to Terraform format. 
+A simple utility to convert DataDog dashboards and/or monitors to Terraform format.
 
 Requires `DATADOG_API_KEY` and `DATADOG_APP_KEY` environment variables.
 
@@ -9,8 +9,8 @@ Useful, if you had all dashboards configured adhoc and now want to follow DevOps
 # How to build
 Just run (GOPATH and sometimes GOBIN have to be set):
 ```bash
-dep ensure
-go generate && go build
+cd src
+go build && ./dd2tf
 ```
 
 # Examples
