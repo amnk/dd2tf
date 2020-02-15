@@ -44,10 +44,11 @@ You can find api/app keys in settings, under `Integrations -> API` section.
 
 # Running with Docker
 ```bash
-./create_image.sh
+./create_images.sh
 export DATADOG_API_KEY=xxx
 export DATADOG_APP_KEY=xxx
 ./run_dd2tf.sh [usual dd2tf arguments go here]
+./run_tar_exports.sh [optional arguments for tar filename go here]
 ```
 
 credit to <https://github.com/miguno/golang-docker-build-tutorial> for an example on how to build a Go app into a Docker image and to provide useful Bash script wrappers
