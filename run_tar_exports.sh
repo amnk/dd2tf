@@ -26,8 +26,11 @@ if [ -n "${1}" ]; then
 fi
 
 # ensure any prior created $TAR_FILENAME is removed
-rm -f ${PWD}/exports/${TAR_FILENAME} ${PWD}/exports/exports.tar.gz
+rm -f "${PWD}/exports/${TAR_FILENAME}" "${PWD}/exports/exports.tar.gz"
+
+# touch $TAR_FILENAME to avoid "tar file changed as we read it" warning
+touch "${PWD}/exports/${TAR_FILENAME}"
 
 echo "Terraform validated. Creating tar archive of exported Datadog Terraform files..."
 # tar the exports/ directory
-docker run --rm -v ${PWD}/exports:/app/exports -w /app/exports debian:stable tar -C /app/exports --exclude=./.* -czvf "./${TAR_FILENAME}" . 
+docker run --rm -v ${PWD}/exports:/app/exports -w /app/exports debian:stable tar -C /app/exports --exclude="${TAR_FILENAME}" --exclude=./.* -czvf "./${TAR_FILENAME}" . 
