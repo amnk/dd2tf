@@ -30,4 +30,4 @@ rm -f ${PWD}/exports/${TAR_FILENAME} ${PWD}/exports/exports.tar.gz
 
 echo "Terraform validated. Creating tar archive of exported Datadog Terraform files..."
 # tar the exports/ directory
-docker run --rm -v ${PWD}/exports:/app/exports -w /app/exports debian:stable tar -C /app/exports --exclude=./.* -czvf ./${TAR_FILENAME} . 
+docker run --rm -v ${PWD}/exports:/app/exports -w /app/exports debian:stable tar -C /app/exports --exclude=./.* -czvf "./${TAR_FILENAME}" . 
