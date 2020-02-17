@@ -30,8 +30,8 @@ echo "Starting export of Datadog files to Terraform configs..."
 docker run --rm -e DATADOG_API_KEY=$DATADOG_API_KEY -e DATADOG_APP_KEY=$DATADOG_APP_KEY -v ${PWD}/exports:/app/exports toozej/dd2tf:latest $@
 
 # if exports is empty, exit 3
-if [ ! "$(ls -A ${PWD}/exports)" ]; then
-    echo -e "${PWD}/exports/ directory is empty, this means the dd2tf export failed. Check log messages above.\n"
+if [ ! "$(ls ${PWD}/exports/*.tf)" ]; then
+    echo -e "${PWD}/exports/ directory doesn't contain any .tf files. This means the dd2tf export failed. Check log messages above.\n"
     exit 3
 fi
 
