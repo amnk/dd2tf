@@ -15,9 +15,9 @@ import (
 )
 
 type LocalConfig struct {
-	client     datadog.Client
-	items      []Item
-	files      bool
+	client	 datadog.Client
+	items	  []Item
+	files	  bool
 	components []DatadogElement
 }
 
@@ -52,12 +52,16 @@ func (i *Item) renderElement(item interface{}, config LocalConfig) {
 	b, _ := Asset(i.d.getAsset())
 	t, _ := template.New("").Funcs(template.FuncMap{
 		"escapeCharacters": escapeCharacters,
-		"DeRefString":      func(s *string) string { return *s },
+		"DeRefString":	  func(s *string) string { return *s },
 	}).Parse(string(b))
 
 	if config.files {
 		log.Debug("Creating file", i.d.getName(), i.id)
-		file := fmt.Sprintf("%v-%v.tf", i.d.getName(), i.id)
+		path := "exports"
+		if _, err := os.Stat(path); os.IsNotExist(err) {
+			os.Mkdir(path, 0644)
+		}
+		file := fmt.Sprintf("%v/%v-%v.tf", path, i.d.getName(), i.id)
 		f, err := os.OpenFile(file, os.O_RDWR|os.O_CREATE, 0755)
 		if err != nil {
 			log.Fatal(err)

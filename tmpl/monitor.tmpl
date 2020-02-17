@@ -1,4 +1,4 @@
-resource "datadog_monitor" "{{ .Id }}" {
+resource "datadog_monitor" "dd_{{ .Id }}" {
   name               = "{{ .Name }}"
   type               = "{{ .Type }}"
   {{- if .Tags }}
@@ -27,7 +27,7 @@ EOT
   timeout_h = {{ .TimeoutH }}
   {{- end }}
   {{- if .IncludeTags }}
-  include_tags = {{ .IncludeTags  }}
+  include_tags = {{ .IncludeTags }}
   {{- end }}
   {{- if .RequireFullWindow }}
   require_full_window = {{ .RequireFullWindow }}
@@ -41,7 +41,7 @@ EOT
 
   {{- if .Thresholds }}
   {{- with .Thresholds }}
-  thresholds {
+  thresholds = {
     {{- if .Ok }}
     ok = {{ .Ok }}
     {{- end }}

@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/amnk/dd2tf.svg?branch=master)](https://travis-ci.org/amnk/dd2tf)
+[![Build Status](https://travis-ci.org/toozej/dd2tf.svg?branch=master)](https://travis-ci.org/toozej/dd2tf)
 
 A simple utility to convert DataDog dashboards and/or monitors to Terraform format. 
 
@@ -11,6 +11,7 @@ Just run (GOPATH and sometimes GOBIN have to be set):
 ```bash
 dep ensure
 go generate && go build
+go install
 ```
 
 # Examples
@@ -21,7 +22,7 @@ DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf dashboards --all
 
 Export one particular dashboard (where `1111` is the ID of the dashboard):
 ```bash
-DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf dashboards --ids 111
+DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf dashboards --ids 1111
 ```
 
 Write dashboards to corresponding files:
@@ -40,3 +41,14 @@ DATADOG_API_KEY=xxx DATADOG_APP_KEY=xxx ./dd2tf screenboards --all
 ```
 
 You can find api/app keys in settings, under `Integrations -> API` section.
+
+# Running with Docker
+```bash
+./create_images.sh
+export DATADOG_API_KEY=xxx
+export DATADOG_APP_KEY=xxx
+./run_dd2tf.sh [usual dd2tf arguments go here]
+./run_tar_exports.sh [optional arguments for tar filename go here]
+```
+
+credit to <https://github.com/miguno/golang-docker-build-tutorial> for an example on how to build a Go app into a Docker image and to provide useful Bash script wrappers
