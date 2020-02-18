@@ -9,8 +9,8 @@ import (
 type Monitor struct {
 }
 
-func (m Monitor) getElement(client datadog.Client, id int) (interface{}, error) {
-	mon, err := client.GetMonitor(id)
+func (m Monitor) getElement(client datadog.Client, id interface{}) (interface{}, error) {
+	mon, err := client.GetMonitor(*datadog.Int(id.(int)))
 	return mon, err
 }
 
