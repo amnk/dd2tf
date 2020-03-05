@@ -153,8 +153,14 @@ func main() {
 					log.Fatal("Datadog APP key not found, please make sure that DATADOG_APP_KEY env variable is set")
 				}
 
+				datadogBaseURL, ok := os.LookupEnv("DATADOG_BASE_URL")
+
 				config = LocalConfig{
 					client: *datadog.NewClient(datadogAPIKey, datadogAPPKey),
+				}
+
+				if ok {
+					config.client.SetBaseUrl(datadogBaseURL)
 				}
 
 				if subcommandOpts.debug {
