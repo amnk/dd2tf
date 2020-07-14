@@ -20,12 +20,13 @@ type DataPoint [2]*float64
 // Metric represents a collection of data points that we might send or receive
 // on one single metric line.
 type Metric struct {
-	Metric *string     `json:"metric,omitempty"`
-	Points []DataPoint `json:"points,omitempty"`
-	Type   *string     `json:"type,omitempty"`
-	Host   *string     `json:"host,omitempty"`
-	Tags   []string    `json:"tags,omitempty"`
-	Unit   *string     `json:"unit,omitempty"`
+	Metric   *string     `json:"metric,omitempty"`
+	Points   []DataPoint `json:"points,omitempty"`
+	Type     *string     `json:"type,omitempty"`
+	Host     *string     `json:"host,omitempty"`
+	Tags     []string    `json:"tags,omitempty"`
+	Unit     *string     `json:"unit,omitempty"`
+	Interval *int        `json:"interval,omitempty"`
 }
 
 // Unit represents a unit definition that we might receive when query for timeseries data.
@@ -55,6 +56,7 @@ type Series struct {
 	Scope       *string     `json:"scope,omitempty"`
 	Expression  *string     `json:"expression,omitempty"`
 	Units       *UnitPair   `json:"unit,omitempty"`
+	QueryIndex  *int        `json:"query_index,omitempty"`
 }
 
 // reqPostSeries from /api/v1/series

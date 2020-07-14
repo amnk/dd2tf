@@ -33,12 +33,12 @@
   version = "v1.0.3"
 
 [[projects]]
-  digest = "1:aa7ab4fd27851221e4153921472ef7e3c1b048eaacca8e87c73fb7a094250dd7"
+  digest = "1:4ead1c6f5d8ea20782d97da1e605967414435616019b006375d4f73e10c79a19"
   name = "github.com/zorkian/go-datadog-api"
   packages = ["."]
   pruneopts = "UT"
-  revision = "f3f6d2f4859047aae0cac1ce3d16689608480fd9"
-  version = "v2.18.0"
+  revision = "1da8da5725ee2cd0ac164baf69c8ec81cb4941df"
+  version = "v2.29.0"
 
 [[projects]]
   branch = "master"

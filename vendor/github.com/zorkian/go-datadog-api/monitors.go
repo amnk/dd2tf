@@ -16,6 +16,32 @@ import (
 	"strings"
 )
 
+type Period struct {
+	Seconds *json.Number `json:"seconds,omitempty"`
+	Text    *string      `json:"text,omitempty"`
+	Value   *string      `json:"value,omitempty"`
+	Name    *string      `json:"name,omitempty"`
+	Unit    *string      `json:"unit,omitempty"`
+}
+
+type LogSet struct {
+	ID   *json.Number `json:"id,omitempty"`
+	Name *string      `json:"name,omitempty"`
+}
+
+type TimeRange struct {
+	To   *json.Number `json:"to,omitempty"`
+	From *json.Number `json:"from,omitempty"`
+	Live *bool        `json:"live,omitempty"`
+}
+
+type QueryConfig struct {
+	LogSet        *LogSet    `json:"logset,omitempty"`
+	TimeRange     *TimeRange `json:"timeRange,omitempty"`
+	QueryString   *string    `json:"queryString,omitempty"`
+	QueryIsFailed *bool      `json:"queryIsFailed,omitempty"`
+}
+
 type ThresholdCount struct {
 	Ok               *json.Number `json:"ok,omitempty"`
 	Critical         *json.Number `json:"critical,omitempty"`
@@ -23,6 +49,8 @@ type ThresholdCount struct {
 	Unknown          *json.Number `json:"unknown,omitempty"`
 	CriticalRecovery *json.Number `json:"critical_recovery,omitempty"`
 	WarningRecovery  *json.Number `json:"warning_recovery,omitempty"`
+	Period           *Period      `json:"period,omitempty"`
+	TimeAggregator   *string      `json:"timeAggregator,omitempty"`
 }
 
 type ThresholdWindows struct {
@@ -61,6 +89,8 @@ type Options struct {
 	IncludeTags       *bool             `json:"include_tags,omitempty"`
 	RequireFullWindow *bool             `json:"require_full_window,omitempty"`
 	Locked            *bool             `json:"locked,omitempty"`
+	EnableLogsSample  *bool             `json:"enable_logs_sample,omitempty"`
+	QueryConfig       *QueryConfig      `json:"queryConfig,omitempty"`
 }
 
 type TriggeringValue struct {
@@ -107,6 +137,18 @@ type Creator struct {
 	Name   *string `json:"name,omitempty"`
 }
 
+// MuteMonitorScope specifies which scope to mute and when to end the mute
+type MuteMonitorScope struct {
+	Scope *string `json:"scope,omitempty"`
+	End   *int    `json:"end,omitempty"`
+}
+
+// UnmuteMonitorScopes specifies which scope(s) to unmute
+type UnmuteMonitorScopes struct {
+	Scope     *string `json:"scope,omitempty"`
+	AllScopes *bool   `json:"all_scopes,omitempty"`
+}
+
 // reqMonitors receives a slice of all monitors
 type reqMonitors struct {
 	Monitors []Monitor `json:"monitors,omitempty"`
@@ -139,34 +181,19 @@ func (client *Client) GetMonitor(id int) (*Monitor, error) {
 	return &out, nil
 }
 
-// GetMonitor retrieves monitors by name
-func (self *Client) GetMonitorsByName(name string) ([]Monitor, error) {
-	var out reqMonitors
-	query, err := url.ParseQuery(fmt.Sprintf("name=%v", name))
-	if err != nil {
-		return nil, err
-	}
-
-	err = self.doJsonRequest("GET", fmt.Sprintf("/v1/monitor?%v", query.Encode()), nil, &out.Monitors)
-	if err != nil {
-		return nil, err
-	}
-	return out.Monitors, nil
+// GetMonitorsByName retrieves monitors by name
+func (client *Client) GetMonitorsByName(name string) ([]Monitor, error) {
+	return client.GetMonitorsWithOptions(MonitorQueryOpts{Name: &name})
 }
 
-// GetMonitor retrieves monitors by a slice of tags
-func (self *Client) GetMonitorsByTags(tags []string) ([]Monitor, error) {
-	var out reqMonitors
-	query, err := url.ParseQuery(fmt.Sprintf("monitor_tags=%v", strings.Join(tags, ",")))
-	if err != nil {
-		return nil, err
-	}
+// GetMonitorsByTags retrieves monitors by a slice of tags
+func (client *Client) GetMonitorsByTags(tags []string) ([]Monitor, error) {
+	return client.GetMonitorsWithOptions(MonitorQueryOpts{Tags: tags})
+}
 
-	err = self.doJsonRequest("GET", fmt.Sprintf("/v1/monitor?%v", query.Encode()), nil, &out.Monitors)
-	if err != nil {
-		return nil, err
-	}
-	return out.Monitors, nil
+// GetMonitorsByMonitorTags retrieves monitors by a slice of monitor tags
+func (client *Client) GetMonitorsByMonitorTags(tags []string) ([]Monitor, error) {
+	return client.GetMonitorsWithOptions(MonitorQueryOpts{MonitorTags: tags})
 }
 
 // DeleteMonitor removes a monitor from the system
@@ -175,10 +202,61 @@ func (client *Client) DeleteMonitor(id int) error {
 		nil, nil)
 }
 
+// ForceDeleteMonitor removes a monitor from the system, even if it's linked to SLOs or group monitors
+func (client *Client) ForceDeleteMonitor(id int) error {
+	return client.doJsonRequest("DELETE", fmt.Sprintf("/v1/monitor/%d?force=true", id),
+		nil, nil)
+}
+
 // GetMonitors returns a slice of all monitors
 func (client *Client) GetMonitors() ([]Monitor, error) {
+	return client.GetMonitorsWithOptions(MonitorQueryOpts{})
+}
+
+// MonitorQueryOpts contains the options supported by
+// https://docs.datadoghq.com/api/?lang=bash#get-all-monitor-details
+type MonitorQueryOpts struct {
+	GroupStates   []string
+	Name          *string
+	Tags          []string
+	MonitorTags   []string
+	WithDowntimes *bool
+}
+
+// GetMonitorsWithOptions returns a slice of all monitors
+// It supports all the options for querying
+func (client *Client) GetMonitorsWithOptions(opts MonitorQueryOpts) ([]Monitor, error) {
 	var out reqMonitors
-	if err := client.doJsonRequest("GET", "/v1/monitor", nil, &out.Monitors); err != nil {
+	var query []string
+	if len(opts.Tags) > 0 {
+		value := fmt.Sprintf("tags=%v", strings.Join(opts.Tags, ","))
+		query = append(query, value)
+	}
+
+	if len(opts.GroupStates) > 0 {
+		value := fmt.Sprintf("group_states=%v", strings.Join(opts.GroupStates, ","))
+		query = append(query, value)
+	}
+
+	if len(opts.MonitorTags) > 0 {
+		value := fmt.Sprintf("monitor_tags=%v", strings.Join(opts.MonitorTags, ","))
+		query = append(query, value)
+	}
+
+	if v, ok := opts.GetWithDowntimesOk(); ok {
+		query = append(query, fmt.Sprintf("with_downtimes=%t", v))
+	}
+
+	if v, ok := opts.GetNameOk(); ok {
+		query = append(query, fmt.Sprintf("name=%s", v))
+	}
+
+	queryString, err := url.ParseQuery(strings.Join(query, "&"))
+	if err != nil {
+		return nil, err
+	}
+	err = client.doJsonRequest("GET", fmt.Sprintf("/v1/monitor?%v", queryString.Encode()), nil, &out.Monitors)
+	if err != nil {
 		return nil, err
 	}
 	return out.Monitors, nil
@@ -199,7 +277,17 @@ func (client *Client) MuteMonitor(id int) error {
 	return client.doJsonRequest("POST", fmt.Sprintf("/v1/monitor/%d/mute", id), nil, nil)
 }
 
+// MuteMonitorScope turns off monitoring notifications for a monitor for a given scope
+func (client *Client) MuteMonitorScope(id int, muteMonitorScope *MuteMonitorScope) error {
+	return client.doJsonRequest("POST", fmt.Sprintf("/v1/monitor/%d/mute", id), muteMonitorScope, nil)
+}
+
 // UnmuteMonitor turns on monitoring notifications for a monitor
 func (client *Client) UnmuteMonitor(id int) error {
 	return client.doJsonRequest("POST", fmt.Sprintf("/v1/monitor/%d/unmute", id), nil, nil)
+}
+
+// UnmuteMonitorScopes is similar to UnmuteMonitor, but provides finer-grained control to unmuting
+func (client *Client) UnmuteMonitorScopes(id int, unmuteMonitorScopes *UnmuteMonitorScopes) error {
+	return client.doJsonRequest("POST", fmt.Sprintf("/v1/monitor/%d/unmute", id), unmuteMonitorScopes, nil)
 }
