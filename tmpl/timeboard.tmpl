@@ -1,4 +1,4 @@
-resource "datadog_timeboard" "{{ .Id }}" {
+resource "datadog_timeboard" "dd_{{ .Id }}" {
   title       = "{{ .Title }}"
   description = "{{ .Description }}"
   read_only   = {{ .ReadOnly -}}
@@ -13,7 +13,7 @@ resource "datadog_timeboard" "{{ .Id }}" {
     {{- if .Groups -}}group = [{{$groups := .Groups}}{{range $index, $elem := .Groups}}{{if $index}},{{end}}"{{$elem}}"{{end}}]{{- end}}
     {{- if .Scopes -}}scope = [{{$scopes := .Scopes}}{{range $index, $elem := .Scopes}}{{if $index}},{{end}}"{{$elem}}"{{end}}]{{- end}}
     {{- if .Style -}}
-    style {
+    style = {
       palette      = "{{ .Style.Palette }}"
       palette_flip = "{{ .Style.PaletteFlip }}"
     }{{- end}}
@@ -29,7 +29,7 @@ resource "datadog_timeboard" "{{ .Id }}" {
       {{ if .Type -}}type = "{{ .Type }}"{{ end }}
       {{ if .Aggregator -}}{{ if ne "" (DeRefString .Aggregator) -}}aggregator = "{{ .Aggregator }}"{{ end}}{{ end -}}
       {{ if .Style -}}{{ with .Style }}
-      style {
+      style = {
         {{if .Palette -}}palette = "{{ .Palette }}"{{- end}}
         {{if .Width -}}width = "{{ .Width }}"{{- end}}
         {{if .Type -}}type = "{{ .Type }}"{{- end}}
@@ -54,6 +54,6 @@ resource "datadog_timeboard" "{{ .Id }}" {
   template_variable {
     name    = "{{ .Name }}"
     prefix  = "{{ .Prefix }}"
-    default = "{{ .Default }}" 
+    default = "{{ .Default }}"
   }{{end}}{{- end}}
 }
