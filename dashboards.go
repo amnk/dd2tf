@@ -9,8 +9,8 @@ import (
 type Dashboard struct {
 }
 
-func (d Dashboard) getElement(client datadog.Client, id int) (interface{}, error) {
-	dash, err := client.GetDashboard(*datadog.Int(id))
+func (d Dashboard) getElement(client datadog.Client, id interface{}) (interface{}, error) {
+	dash, err := client.GetDashboard(id)
 	return dash, err
 }
 

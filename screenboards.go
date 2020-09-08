@@ -9,8 +9,8 @@ import (
 type ScreenBoard struct {
 }
 
-func (s ScreenBoard) getElement(client datadog.Client, id int) (interface{}, error) {
-	elem, err := client.GetScreenboard(*datadog.Int(id))
+func (s ScreenBoard) getElement(client datadog.Client, id interface{}) (interface{}, error) {
+	elem, err := client.GetScreenboard(id)
 	return elem, err
 }
 

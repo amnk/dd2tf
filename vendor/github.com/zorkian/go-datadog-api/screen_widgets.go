@@ -2,6 +2,31 @@ package datadog
 
 import "encoding/json"
 
+type PrecisionT string
+
+// UnmarshalJSON is a Custom Unmarshal for PrecisionT. The Datadog API can
+// return 1 (int), "1" (number, but a string type) or something like "100%" or
+// "*" (string).
+func (p *PrecisionT) UnmarshalJSON(data []byte) error {
+	var err error
+	var precisionNum json.Number
+	if err = json.Unmarshal(data, &precisionNum); err == nil {
+		*p = PrecisionT(precisionNum)
+		return nil
+	}
+
+	var precisionStr string
+	if err = json.Unmarshal(data, &precisionStr); err == nil {
+		*p = PrecisionT(precisionStr)
+		return nil
+	}
+
+	var p0 PrecisionT
+	*p = p0
+
+	return err
+}
+
 type TileDef struct {
 	Events     []TileDefEvent   `json:"events,omitempty"`
 	Markers    []TileDefMarker  `json:"markers,omitempty"`
@@ -9,7 +34,7 @@ type TileDef struct {
 	Viz        *string          `json:"viz,omitempty"`
 	CustomUnit *string          `json:"custom_unit,omitempty"`
 	Autoscale  *bool            `json:"autoscale,omitempty"`
-	Precision  *json.Number     `json:"precision,omitempty"`
+	Precision  *PrecisionT      `json:"precision,omitempty"`
 	TextAlign  *string          `json:"text_align,omitempty"`
 
 	// For hostmap
@@ -32,7 +57,6 @@ type TileDefMarker struct {
 }
 
 type TileDefRequest struct {
-	Query *string `json:"q,omitempty"`
 
 	// For Hostmap
 	Type *string `json:"type,omitempty"`
@@ -44,24 +68,69 @@ type TileDefRequest struct {
 	TagFilters []*string `json:"tag_filters"`
 	Limit      *int      `json:"limit,omitempty"`
 
-	ConditionalFormats []ConditionalFormat  `json:"conditional_formats,omitempty"`
-	Style              *TileDefRequestStyle `json:"style,omitempty"`
-	Aggregator         *string              `json:"aggregator,omitempty"`
-	CompareTo          *string              `json:"compare_to,omitempty"`
-	ChangeType         *string              `json:"change_type,omitempty"`
-	OrderBy            *string              `json:"order_by,omitempty"`
-	OrderDir           *string              `json:"order_dir,omitempty"`
-	ExtraCol           *string              `json:"extra_col,omitempty"`
-	IncreaseGood       *bool                `json:"increase_good,omitempty"`
+	// A Widget can only have one of these types of query.
+	Query        *string               `json:"q,omitempty"`
+	LogQuery     *TileDefApmOrLogQuery `json:"log_query,omitempty"`
+	ApmQuery     *TileDefApmOrLogQuery `json:"apm_query,omitempty"`
+	ProcessQuery *TileDefProcessQuery  `json:"process_query,omitempty"`
+
+	ConditionalFormats []ConditionalFormat        `json:"conditional_formats,omitempty"`
+	Style              *TileDefRequestStyle       `json:"style,omitempty"`
+	Aggregator         *string                    `json:"aggregator,omitempty"`
+	CompareTo          *string                    `json:"compare_to,omitempty"`
+	ChangeType         *string                    `json:"change_type,omitempty"`
+	OrderBy            *string                    `json:"order_by,omitempty"`
+	OrderDir           *string                    `json:"order_dir,omitempty"`
+	ExtraCol           *string                    `json:"extra_col,omitempty"`
+	IncreaseGood       *bool                      `json:"increase_good,omitempty"`
+	Metadata           map[string]TileDefMetadata `json:"metadata,omitempty"`
+}
+
+// TileDefApmOrLogQuery represents an APM or a Log query
+type TileDefApmOrLogQuery struct {
+	Index   *string                       `json:"index"`
+	Compute *TileDefApmOrLogQueryCompute  `json:"compute"`
+	Search  *TileDefApmOrLogQuerySearch   `json:"search,omitempty"`
+	GroupBy []TileDefApmOrLogQueryGroupBy `json:"groupBy,omitempty"`
+}
+type TileDefApmOrLogQueryCompute struct {
+	Aggregation *string `json:"aggregation"`
+	Facet       *string `json:"facet,omitempty"`
+	Interval    *string `json:"interval,omitempty"`
+}
+type TileDefApmOrLogQuerySearch struct {
+	Query *string `json:"query"`
+}
+type TileDefApmOrLogQueryGroupBy struct {
+	Facet *string                          `json:"facet"`
+	Limit *int                             `json:"limit,omitempty"`
+	Sort  *TileDefApmOrLogQueryGroupBySort `json:"sort,omitempty"`
+}
+type TileDefApmOrLogQueryGroupBySort struct {
+	Aggregation *string `json:"aggregation"`
+	Order       *string `json:"order"`
+	Facet       *string `json:"facet,omitempty"`
+}
+
+type TileDefProcessQuery struct {
+	Metric   *string  `json:"metric"`
+	SearchBy *string  `json:"search_by,omitempty"`
+	FilterBy []string `json:"filter_by,omitempty"`
+	Limit    *int     `json:"limit,omitempty"`
+}
+
+type TileDefMetadata struct {
+	Alias *string `json:"alias,omitempty"`
 }
 
 type ConditionalFormat struct {
-	Color      *string `json:"color,omitempty"`
-	Palette    *string `json:"palette,omitempty"`
-	Comparator *string `json:"comparator,omitempty"`
-	Invert     *bool   `json:"invert,omitempty"`
-	Value      *string `json:"value,omitempty"`
-	ImageURL   *string `json:"image_url,omitempty"`
+	Color         *string `json:"custom_fg_color,omitempty"`
+	Palette       *string `json:"palette,omitempty"`
+	Comparator    *string `json:"comparator,omitempty"`
+	Invert        *bool   `json:"invert,omitempty"`
+	CustomBgColor *string `json:"custom_bg_color,omitempty"`
+	Value         *string `json:"value,omitempty"`
+	ImageURL      *string `json:"image_url,omitempty"`
 }
 
 type TileDefRequestStyle struct {
@@ -71,10 +140,10 @@ type TileDefRequestStyle struct {
 }
 
 type TileDefStyle struct {
-	Palette     *string `json:"palette,omitempty"`
-	PaletteFlip *string `json:"paletteFlip,omitempty"`
-	FillMin     *string `json:"fillMin,omitempty"`
-	FillMax     *string `json:"fillMax,omitempty"`
+	Palette     *string      `json:"palette,omitempty"`
+	PaletteFlip *string      `json:"paletteFlip,omitempty"`
+	FillMin     *json.Number `json:"fillMin,omitempty"`
+	FillMax     *json.Number `json:"fillMax,omitempty"`
 }
 
 type Time struct {
@@ -96,7 +165,7 @@ type Widget struct {
 	// For Timeseries, TopList, EventTimeline, EvenStream, AlertGraph, CheckStatus, ServiceSummary, LogStream widgets
 	Time *Time `json:"time,omitempty"`
 
-	// For Timeseries, QueryValue, HostMap, Change, Toplist, Process widgets
+	// For Timeseries, QueryValue, QueryTable, HostMap, Change, Toplist, Process widgets
 	TileDef *TileDef `json:"tile_def,omitempty"`
 
 	// For FreeText widget
@@ -104,14 +173,14 @@ type Widget struct {
 	Color *string `json:"color,omitempty"`
 
 	// For AlertValue widget
-	TextSize  *string `json:"text_size,omitempty"`
-	Unit      *string `json:"unit,omitempty"`
-	Precision *string `json:"precision,omitempty"`
+	TextSize  *string     `json:"text_size,omitempty"`
+	Unit      *string     `json:"unit,omitempty"`
+	Precision *PrecisionT `json:"precision,omitempty"`
 
 	// AlertGraph widget
 	VizType *string `json:"viz_type,omitempty"`
 
-	// For AlertValue, QueryValue, FreeText, Note widgets
+	// For AlertValue, QueryValue, QueryTable, FreeText, Note widgets
 	TextAlign *string `json:"text_align,omitempty"`
 
 	// For FreeText, Note widgets
@@ -121,12 +190,15 @@ type Widget struct {
 	AlertID     *int  `json:"alert_id,omitempty"`
 	AutoRefresh *bool `json:"auto_refresh,omitempty"`
 
-	// For Timeseries, QueryValue, Toplist widgets
+	// For Timeseries, QueryValue, QueryTable, Toplist widgets
 	Legend     *bool   `json:"legend,omitempty"`
 	LegendSize *string `json:"legend_size,omitempty"`
 
 	// For EventTimeline, EventStream, Hostmap, LogStream widgets
 	Query *string `json:"query,omitempty"`
+
+	// For EventTimeline, EventStream
+	TagsExecution *string `json:"tags_execution,omitempty"`
 
 	// For Image, IFrame widgets
 	URL *string `json:"url,omitempty"`
@@ -174,10 +246,17 @@ type Widget struct {
 	ManageStatusTitleSize  *string `json:"titleSize,omitempty"`
 	ManageStatusTitleAlign *string `json:"titleAlign,omitempty"`
 	Params                 *Params `json:"params,omitempty"`
+	ShowLastTriggered      *bool   `json:"show_last_triggered,omitempty"`
+	SummaryType            *string `json:"summary_type,omitempty"`
 
 	// For LogStream widget
-	Columns *string `json:"columns,omitempty"`
-	Logset  *string `json:"logset,omitempty"`
+	Columns           *string          `json:"columns,omitempty"`
+	Logset            *string          `json:"logset,omitempty"`
+	Indexes           []*string        `json:"indexes,omitempty"`
+	ShowDateColumn    *bool            `json:"show_date_column,omitempty"`
+	ShowMessageColumn *bool            `json:"show_message_column,omitempty"`
+	MessageDisplay    *string          `json:"message_display,omitempty"`
+	Sort              *WidgetFieldSort `json:"sort,omitempty"`
 
 	// For Uptime
 	// Widget is undocumented, subject to breaking API changes, and without customer support
