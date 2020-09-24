@@ -1,5 +1,5 @@
 
-A simple utility to convert DataDog dashboards and/or monitors to Terraform format. 
+A simple utility to convert Datadog dashboards and/or monitors to Terraform format. 
 
 Requires `DATADOG_API_KEY` and `DATADOG_APP_KEY` environment variables.
 
